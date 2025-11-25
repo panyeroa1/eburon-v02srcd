@@ -1,4 +1,4 @@
-import { GoogleGenAI, Modality, Type, GenerateContentResponse } from "@google/genai";
+import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { ApartmentSearchFilters, NLUResponse } from '../types';
 
 const apiKey = process.env.API_KEY || '';
@@ -11,7 +11,6 @@ export const blobToBase64 = (blob: Blob): Promise<string> => {
     const reader = new FileReader();
     reader.onloadend = () => {
         const base64data = reader.result as string;
-        // remove data:audio/wav;base64, prefix
         resolve(base64data.split(',')[1]);
     };
     reader.onerror = reject;
@@ -24,7 +23,7 @@ export const createAudioContext = (sampleRate: number): AudioContext => {
   return new AudioCtor({ sampleRate });
 };
 
-// --- NLU Fallback (Text Mode) ---
+// --- NLU for Text Search ---
 
 export async function parseUserUtterance(
   userText: string, 
@@ -37,8 +36,12 @@ export async function parseUserUtterance(
   User said: "${userText}"
   Current filters: ${JSON.stringify(stateFilters)}
   
-  Extract filters and generate a warm, short reply.
-  Return JSON.
+  Your task:
+  1. Analyze the user's request.
+  2. Update the search filters based on their input (e.g., location, price, type).
+  3. Generate a short, friendly reply confirming the action.
+  
+  Return a JSON object.
   `;
 
   const response = await ai.models.generateContent({
@@ -75,43 +78,11 @@ export async function parseUserUtterance(
   return JSON.parse(response.text) as NLUResponse;
 }
 
-// --- New Capabilities ---
-
-export async function analyzeMatchWithThinking(resume: string, jobDesc: string): Promise<string | undefined> {
-  // Use gemini-2.5-flash which supports thinking config
-  const modelId = 'gemini-2.5-flash'; 
-  const prompt = `
-  Resume: ${resume}
-  Job Description: ${jobDesc}
-  
-  Analyze the fit between this resume and job description. 
-  Highlight strengths, weaknesses, and give a match score out of 10.
-  `;
-
-  const response = await ai.models.generateContent({
-    model: modelId,
-    contents: prompt,
-    config: {
-      // Thinking budget and maxOutputTokens must be set together
-      thinkingConfig: { thinkingBudget: 2048 },
-      maxOutputTokens: 8192,
-    }
-  });
-
-  return response.text;
-}
-
-export async function getFastJobTips(topic: string): Promise<string> {
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: `Give me one quick, actionable tip for ${topic}. Keep it under 20 words.`,
-  });
-  return response.text || "Keep persistent!";
-}
+// --- Chat Helpers ---
 
 export async function getGeminiChatResponse(
   message: string,
-  history: any[], // Accepts array of { role, parts }
+  history: any[],
   toolsConfig: { search?: boolean, maps?: boolean }
 ): Promise<GenerateContentResponse> {
     const tools: any[] = [];
@@ -132,4 +103,56 @@ export async function getGeminiChatResponse(
 
     const response = await chat.sendMessage({ message });
     return response as GenerateContentResponse;
+}
+
+// --- Analysis Helpers (Thinking Model) ---
+
+export async function analyzeMatchWithThinking(resume: string, jobDesc: string): Promise<string> {
+    const prompt = `
+    You are an expert HR Technical Recruiter.
+    Please analyze the candidate's fit for the job based on the provided text.
+    
+    RESUME:
+    ${resume}
+    
+    JOB DESCRIPTION:
+    ${jobDesc}
+    
+    Using your reasoning capabilities:
+    1. Identify the top 3 matches in skills/experience.
+    2. Identify the top 3 gaps or missing qualifications.
+    3. Provide a Match Score (0-100%).
+    4. Provide a final verdict: Strong Match, Potential Match, or Not a Match.
+    
+    Format the output as Markdown.
+    `;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                thinkingConfig: {
+                    thinkingBudget: 2048 // Allocate tokens for thinking process
+                }
+            }
+        });
+        return response.text || "Analysis complete but no text returned.";
+    } catch (error) {
+        console.error("Thinking Analysis Error:", error);
+        return "Sorry, I encountered an error while analyzing the match.";
+    }
+}
+
+export async function getFastJobTips(topic: string): Promise<string> {
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Give me a single, high-value, actionable tip about "${topic}" for a job seeker. Keep it concise (max 20 words).`,
+        });
+        return response.text || "Keep your resume updated!";
+    } catch (error) {
+        console.error("Tip Error:", error);
+        return "Always tailor your resume to the job description.";
+    }
 }

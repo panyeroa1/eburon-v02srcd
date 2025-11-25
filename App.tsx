@@ -3,7 +3,7 @@ import ListingCard from './components/ListingCard';
 import ListingDetails from './components/ListingDetails';
 import AdminPanel from './components/AdminPanel';
 import { searchListings } from './services/mockDb';
-import { createAudioContext } from './services/gemini';
+import { createAudioContext, parseUserUtterance } from './services/gemini';
 import { ApartmentSearchFilters, Listing } from './types';
 import { GoogleGenAI, LiveServerMessage, Modality, FunctionDeclaration, Type } from '@google/genai';
 
@@ -87,6 +87,7 @@ const App: React.FC = () => {
   const [filters, setFilters] = useState<ApartmentSearchFilters>({ sortBy: 'default' });
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [assistantReply, setAssistantReply] = useState("Hi! I'm Homie. Tap the mic to find your place.");
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Live API State
   const [isLiveActive, setIsLiveActive] = useState(false);
@@ -132,6 +133,32 @@ const App: React.FC = () => {
     alert(`${feature} is currently under development.`);
   };
 
+  // --- Text Search Handler ---
+  const handleTextSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setAssistantReply("Searching...");
+    setIsLoadingListings(true);
+    
+    try {
+        // Use gemini-2.5-flash for text understanding
+        const response = await parseUserUtterance(searchQuery, filters);
+        
+        if (response.filters) {
+            const newFilters = { ...filters, ...response.filters };
+            setFilters(newFilters);
+            await loadListings(newFilters);
+        }
+        
+        setAssistantReply(response.assistantReply || `Found listings for "${searchQuery}"`);
+    } catch (err) {
+        console.error(err);
+        setAssistantReply("Sorry, I couldn't understand that.");
+        setIsLoadingListings(false);
+    }
+  };
+
   // --- Live API Logic ---
   const startLiveSession = async () => {
     try {
@@ -163,6 +190,9 @@ const App: React.FC = () => {
                       
                       const newFilters = { ...filtersRef.current, ...args };
                       setFilters(newFilters);
+                      // Update UI search query to reflect voice intent subtly or just keep voice state
+                      // We won't overwrite text input to avoid jarring changes while user might be typing
+                      
                       const results = await loadListings(newFilters);
                       
                       functionResponses.push({
@@ -204,6 +234,14 @@ const App: React.FC = () => {
                 setAssistantReply("Homie is speaking...");
              }
 
+             // 3. Handle Input Transcription (Sync Voice -> Search Form)
+             if (message.serverContent?.inputTranscription) {
+                 const transcript = message.serverContent.inputTranscription.text;
+                 if (transcript) {
+                     setSearchQuery(prev => transcript); // Live update input field
+                 }
+             }
+
              if (message.serverContent?.interrupted) {
                  sourcesRef.current.forEach(s => s.stop());
                  sourcesRef.current.clear();
@@ -230,7 +268,8 @@ const App: React.FC = () => {
             systemInstruction: HOMIE_SYSTEM_PROMPT,
             speechConfig: {
                 voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Aoede' } } 
-            }
+            },
+            inputAudioTranscription: {} // Enable transcription
         }
       };
 
@@ -328,24 +367,27 @@ const App: React.FC = () => {
              <span className="font-bold text-xl text-rose-500 tracking-tight hidden sm:block">Eburon Realty</span>
           </div>
 
-          {/* Desktop Search Filters (Visual Only for now, updated by voice) */}
-          <div 
-             onClick={() => handleUnderDev("Visual Filter Menu")}
-             className="hidden md:flex items-center bg-white border border-slate-200 shadow-sm rounded-full px-4 py-2.5 divide-x divide-slate-200 hover:shadow-md transition-shadow cursor-pointer"
+          {/* Functional Search Bar */}
+          <form 
+            onSubmit={handleTextSearch}
+            className="flex-1 max-w-lg mx-4 flex items-center bg-white border border-slate-200 shadow-sm rounded-full px-4 py-2 hover:shadow-md transition-shadow"
           >
-              <div className="px-4 text-sm font-medium">{filters.city || 'Anywhere in Belgium'}</div>
-              <div className="px-4 text-sm font-medium">{filters.type || 'Any type'}</div>
-              <div className="px-4 text-sm text-slate-500 font-light">
-                  {filters.maxPrice ? `Up to €${filters.maxPrice}` : 'Add budget'}
-              </div>
-              <div className="pl-4">
-                  <div className="bg-rose-500 p-2 rounded-full text-white">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                      </svg>
-                  </div>
-              </div>
-          </div>
+              <input 
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={filters.city ? `Searching in ${filters.city}...` : "Ask Homie: 'Apartment in Ghent under €900'"}
+                className="flex-1 bg-transparent outline-none text-sm placeholder:text-slate-400"
+              />
+              <button 
+                type="submit"
+                className="bg-rose-500 p-2 rounded-full text-white hover:bg-rose-600 transition-colors"
+              >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                  </svg>
+              </button>
+          </form>
 
           <div className="flex items-center gap-2">
                <button onClick={() => setCurrentView('admin')} className="text-xs font-semibold text-slate-500 hover:text-slate-900 mr-2">
@@ -392,7 +434,7 @@ const App: React.FC = () => {
             {/* EXPLORE TAB */}
             {currentView === 'explore' && (
                 <div className="max-w-7xl mx-auto">
-                    {/* Categories (Visual) */}
+                    {/* Categories */}
                     <div className="flex gap-8 overflow-x-auto pb-6 mb-4 scrollbar-hide border-b border-slate-100">
                         {['Apartment', 'House', 'Studio', 'Villa', 'Loft'].map(cat => (
                             <button 
@@ -412,6 +454,7 @@ const App: React.FC = () => {
                         ))}
                     </div>
 
+                    {/* Listings Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {isLoadingListings ? (
                             [...Array(8)].map((_, i) => (
@@ -434,7 +477,10 @@ const App: React.FC = () => {
                             <div className="col-span-full text-center py-20 text-slate-400">
                                 <p className="text-lg">No homes found matching these filters.</p>
                                 <button 
-                                    onClick={() => setFilters({ sortBy: 'default' })}
+                                    onClick={() => {
+                                        setFilters({ sortBy: 'default' });
+                                        setSearchQuery('');
+                                    }}
                                     className="mt-4 text-rose-500 underline"
                                 >
                                     Clear filters
