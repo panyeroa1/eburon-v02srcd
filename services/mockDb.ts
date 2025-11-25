@@ -1,4 +1,4 @@
-import { ApartmentSearchFilters, Listing } from '../types';
+import { ApartmentSearchFilters, Listing, Reservation } from '../types';
 
 const MOCK_LISTINGS: Listing[] = [
   {
@@ -100,6 +100,32 @@ const MOCK_LISTINGS: Listing[] = [
     coordinates: { lat: 51.3468, lng: 3.2872 }
   }
 ];
+
+// --- Reservation Logic ---
+
+const STORAGE_KEY = 'eburon_reservations';
+
+export const saveReservation = (listing: Listing): void => {
+  const existing = getReservations();
+  const newReservation: Reservation = {
+    id: Math.random().toString(36).substr(2, 9),
+    listingId: listing.id,
+    listingName: listing.name,
+    listingAddress: listing.address,
+    customerName: 'User-' + Math.floor(Math.random() * 1000), // Simulating logged-in user
+    date: new Date().toISOString(),
+    status: 'pending'
+  };
+  
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...existing, newReservation]));
+};
+
+export const getReservations = (): Reservation[] => {
+  const data = localStorage.getItem(STORAGE_KEY);
+  return data ? JSON.parse(data) : [];
+};
+
+// --- Search Logic ---
 
 export async function searchListings(filters: ApartmentSearchFilters): Promise<Listing[]> {
   // Simulate network delay

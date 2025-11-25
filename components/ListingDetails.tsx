@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Listing } from '../types';
+import { saveReservation } from '../services/mockDb';
 
 interface ListingDetailsProps {
   listing: Listing;
@@ -7,6 +8,23 @@ interface ListingDetailsProps {
 }
 
 const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => {
+  const [isReserving, setIsReserving] = useState(false);
+  const [reserved, setReserved] = useState(false);
+
+  const handleReserve = () => {
+      setIsReserving(true);
+      // Simulate API call
+      setTimeout(() => {
+          saveReservation(listing);
+          setReserved(true);
+          setIsReserving(false);
+      }, 1000);
+  };
+
+  const handleUnderDev = (name: string) => {
+      alert(`${name} feature is currently under development.`);
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-white sm:flex sm:items-center sm:justify-center overflow-y-auto animate-fade-in-up">
       <div 
@@ -52,10 +70,10 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => 
                   </div>
 
                   <div className="py-8 border-b border-slate-200 flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-lg">
+                      <div className="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-lg cursor-pointer" onClick={() => handleUnderDev('Host Profile')}>
                           H
                       </div>
-                      <div>
+                      <div onClick={() => handleUnderDev('Host Profile')} className="cursor-pointer hover:opacity-80">
                           <p className="font-semibold text-slate-900">Hosted by Homie</p>
                           <p className="text-slate-500 text-sm">Superhost • 3 years hosting</p>
                       </div>
@@ -96,8 +114,18 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => 
                   </div>
                   <div className="text-xs font-semibold underline mt-1">Available now</div>
               </div>
-              <button className="bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transform active:scale-95 transition-all">
-                  Reserve
+              <button 
+                  onClick={handleReserve}
+                  disabled={isReserving || reserved}
+                  className={`
+                    font-semibold py-3 px-8 rounded-lg shadow-md transform transition-all 
+                    ${reserved 
+                        ? 'bg-green-600 text-white cursor-default' 
+                        : 'bg-gradient-to-r from-rose-500 to-pink-600 text-white hover:shadow-lg active:scale-95'
+                    }
+                  `}
+              >
+                  {isReserving ? 'Processing...' : reserved ? 'Request Sent!' : 'Reserve / Contact'}
               </button>
           </div>
       </div>

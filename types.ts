@@ -14,6 +14,16 @@ export interface Listing {
   coordinates?: { lat: number; lng: number };
 }
 
+export interface Reservation {
+  id: string;
+  listingId: string;
+  listingName: string;
+  listingAddress: string;
+  customerName: string;
+  date: string;
+  status: 'pending' | 'confirmed';
+}
+
 export type ApartmentSearchFilters = {
   city?: string | null;
   neighborhood?: string | null;

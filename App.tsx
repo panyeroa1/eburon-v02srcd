@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ListingCard from './components/ListingCard';
 import ListingDetails from './components/ListingDetails';
+import AdminPanel from './components/AdminPanel';
 import { searchListings } from './services/mockDb';
 import { createAudioContext } from './services/gemini';
 import { ApartmentSearchFilters, Listing } from './types';
@@ -29,7 +30,7 @@ function bytesToBase64(bytes: Uint8Array): string {
 // --- Tool Definition ---
 const updateFiltersTool: FunctionDeclaration = {
   name: 'updateSearchFilters',
-  description: 'Update the apartment search filters based on user request and return the number of listings found.',
+  description: 'Update the apartment search filters based on user request and return the number of listings found. This is how you execute the search.',
   parameters: {
     type: Type.OBJECT,
     properties: {
@@ -45,63 +46,27 @@ const updateFiltersTool: FunctionDeclaration = {
   },
 };
 
-type ViewState = 'explore' | 'nearby' | 'favorites';
+type ViewState = 'explore' | 'nearby' | 'favorites' | 'admin';
 
 // --- System Prompt ---
 const HOMIE_SYSTEM_PROMPT = `
-[SYSTEM PROMPT – “HOMIE” – MATCH-IT HOME REAL ESTATE VOICE ASSISTANT (BELGIUM ONLY)]
+[SYSTEM PROMPT – “HOMIE” – EBURON REALTY VOICE ASSISTANT (BELGIUM ONLY)]
 
 ROLE & IDENTITY
 
-You are **Homie**, a real estate voice assistant living inside **Match-It Home**, the property search experience of the Match-It platform, powered by **Eburon**.
-
+You are **Homie**, a real estate voice assistant living inside **Eburon Realty** (formerly Match-It Home).
 Your ONLY focus:
 - Help users **find, understand, and shortlist** homes and properties in **Belgium**.
 - You do NOT conduct job interviews.  
 - You do NOT act as an HR or hiring assistant.  
-- You are a **real estate guide**, not a recruiter.
+- You are a **real estate guide**.
 
 You assist with:
 - Searching for **houses, apartments, studios, investment properties**.
 - Clarifying needs and turning vague wishes into **clear search filters**.
 - Guiding users through next steps: viewing details, saving properties, booking visits, or contacting agents/owners.
 
-You are NOT:
-- A financial advisor.
-- A lawyer or notary.
-- A tax expert.
-You never guarantee mortgage approval, legal outcomes, or investment returns. You give **practical, high-level guidance** and always encourage users to confirm details with qualified professionals.
-
-LANGUAGE & VOICE STYLE (HUMAN IMPERFECTIONS)
-
-Your voice persona:
-- Warm, slightly **breathy**, near-field, like a friendly assistant speaking close to a headset mic.
-- Neutral but slightly influenced by **Dutch/Flemish** rhythm when speaking English (in tone, not spelling).
-- Calm, patient, and clear.
-
-Language behavior:
-- Automatically detect and mirror the user’s language (Dutch/Flemish, French, English; others if possible).
-- Match their tone (more formal vs casual) but always remain respectful and professional.
-- If the user switches language, you follow smoothly.
-
-Human imperfections (use subtly, not constantly):
-- Occasional fillers: "uhm," "ah," "okay," "right," "mm-hm."
-- Light repetition when thinking: "So, so just to be clear…"
-- Soft self-corrections: "You said Ghent—uh, sorry, Antwerp, right?"
-- Rare micro-sounds: "[soft cough] Sorry. Okay, let’s continue."
-
-CONTEXT: MATCH-IT HOME VS MAIN MATCH-IT
-
-Match-It (main platform): Works with **AI-powered matching** for jobs and talent.
-Match-It Home: The **real estate** branch, where you live.
-
-Do NOT:
-- Talk about job interviews, CVs, or hiring funnels.
-- Ask HR-style competency questions.
-You stay fully in the domain of **property search and guidance**.
-
-CONVERSATION FLOW (NO INTERVIEWING – PURE PROPERTY SUPPORT)
-
+CONVERSATION FLOW
 1) Warm Greeting  
 2) Clarify Purpose (buy/rent/invest/explore)  
 3) Discovery: Understand Needs & Constraints  
@@ -109,7 +74,8 @@ CONVERSATION FLOW (NO INTERVIEWING – PURE PROPERTY SUPPORT)
 5) Suggest Matches / Directions  
 6) Refine & Adjust Filters  
 
-USE THE 'updateSearchFilters' TOOL WHENEVER THE USER EXPRESSES A PREFERENCE FOR PRICE, LOCATION, TYPE, OR SIZE.
+USE THE 'updateSearchFilters' TOOL WHENEVER THE USER EXPRESSES A PREFERENCE FOR PRICE, LOCATION, TYPE, OR SIZE. 
+After using the tool, tell the user how many homes you found and ask if they want to see the first one.
 `;
 
 const App: React.FC = () => {
@@ -160,6 +126,10 @@ const App: React.FC = () => {
   const toggleFavorite = (e: React.MouseEvent, id: string) => {
       e.stopPropagation();
       setListings(prev => prev.map(l => l.id === id ? { ...l, isFavorite: !l.isFavorite } : l));
+  };
+
+  const handleUnderDev = (feature: string) => {
+    alert(`${feature} is currently under development.`);
   };
 
   // --- Live API Logic ---
@@ -344,18 +314,25 @@ const App: React.FC = () => {
     setAssistantReply("Ready to help.");
   }, []);
 
+  if (currentView === 'admin') {
+    return <AdminPanel onBack={() => setCurrentView('explore')} />;
+  }
+
   return (
     <div className="h-screen bg-white flex flex-col font-sans text-slate-900 overflow-hidden">
       
       {/* --- Top Search & Nav Bar --- */}
       <div className="flex-none px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white z-20">
           <div className="flex items-center gap-2">
-             <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-bold">H</div>
-             <span className="font-bold text-xl text-rose-500 tracking-tight">Homie</span>
+             <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center text-white font-bold font-mono">E</div>
+             <span className="font-bold text-xl text-rose-500 tracking-tight hidden sm:block">Eburon Realty</span>
           </div>
 
           {/* Desktop Search Filters (Visual Only for now, updated by voice) */}
-          <div className="hidden md:flex items-center bg-white border border-slate-200 shadow-sm rounded-full px-4 py-2.5 divide-x divide-slate-200 hover:shadow-md transition-shadow cursor-pointer">
+          <div 
+             onClick={() => handleUnderDev("Visual Filter Menu")}
+             className="hidden md:flex items-center bg-white border border-slate-200 shadow-sm rounded-full px-4 py-2.5 divide-x divide-slate-200 hover:shadow-md transition-shadow cursor-pointer"
+          >
               <div className="px-4 text-sm font-medium">{filters.city || 'Anywhere in Belgium'}</div>
               <div className="px-4 text-sm font-medium">{filters.type || 'Any type'}</div>
               <div className="px-4 text-sm text-slate-500 font-light">
@@ -371,7 +348,10 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-               <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
+               <button onClick={() => setCurrentView('admin')} className="text-xs font-semibold text-slate-500 hover:text-slate-900 mr-2">
+                  Admin
+               </button>
+               <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 overflow-hidden cursor-pointer" onClick={() => handleUnderDev("User Profile")}>
                   <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
                </div>
           </div>
@@ -567,7 +547,10 @@ const App: React.FC = () => {
               <span className="text-[10px] font-semibold">My Home</span>
           </button>
 
-          <button className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600">
+          <button 
+            onClick={() => handleUnderDev("Profile")} 
+            className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600"
+          >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               </svg>
