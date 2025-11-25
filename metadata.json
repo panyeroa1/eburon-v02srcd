@@ -1,0 +1,8 @@
+{
+  "name": "Homie",
+  "description": "Voice-enabled real estate assistant for Belgium powered by Gemini.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}
