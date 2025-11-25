@@ -87,6 +87,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
       }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files.length > 0) {
+          const files = Array.from(e.target.files);
+          
+          const promises = files.map(file => {
+              return new Promise<string>((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onload = (e) => {
+                      if (e.target?.result) {
+                          resolve(e.target.result as string);
+                      }
+                  };
+                  reader.onerror = reject;
+                  reader.readAsDataURL(file);
+              });
+          });
+
+          Promise.all(promises).then(base64Images => {
+              setNewListing(prev => ({
+                  ...prev,
+                  imageUrls: [...(prev.imageUrls || []), ...base64Images]
+              }));
+          }).catch(err => console.error("Error reading files", err));
+      }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 bg-slate-50">
@@ -396,30 +422,70 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                    {/* Step 3: Photos & Review */}
                    {createStep === 3 && (
                        <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm space-y-6">
-                           <h2 className="text-xl font-semibold">Select Photos</h2>
-                           <p className="text-sm text-slate-500">Select photos from our Eburon Stock Gallery to represent your listing.</p>
+                           <h2 className="text-xl font-semibold">Photos</h2>
                            
-                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                               {SAMPLE_IMAGES.map((img, idx) => (
-                                   <div 
-                                      key={idx} 
-                                      onClick={() => toggleImageSelection(img)}
-                                      className={`relative aspect-square cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${newListing.imageUrls?.includes(img) ? 'border-rose-500 ring-2 ring-rose-200' : 'border-transparent hover:border-slate-300'}`}
-                                   >
-                                       <img src={img} alt="House" className="w-full h-full object-cover" />
-                                       {newListing.imageUrls?.includes(img) && (
-                                           <div className="absolute inset-0 bg-rose-500/20 flex items-center justify-center">
-                                               <div className="bg-rose-500 text-white rounded-full p-1">
-                                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4">
+                           {/* Upload Section */}
+                           <div>
+                               <label className="block text-sm font-medium text-slate-700 mb-2">Upload Your Own Photos</label>
+                               <div className="flex items-center justify-center w-full">
+                                  <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                          <svg className="w-8 h-8 mb-3 text-slate-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                          </svg>
+                                          <p className="mb-2 text-sm text-slate-500"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                          <p className="text-xs text-slate-500">SVG, PNG, JPG or GIF</p>
+                                      </div>
+                                      <input id="dropzone-file" type="file" className="hidden" multiple accept="image/*" onChange={handleImageUpload} />
+                                  </label>
+                               </div>
+                           </div>
+
+                           {/* Selected Images Preview */}
+                           {newListing.imageUrls && newListing.imageUrls.length > 0 && (
+                               <div>
+                                   <label className="block text-sm font-medium text-slate-700 mb-2">Selected Photos ({newListing.imageUrls.length})</label>
+                                   <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+                                       {newListing.imageUrls.map((url, idx) => (
+                                           <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 group">
+                                               <img src={url} alt={`Listing ${idx}`} className="w-full h-full object-cover" />
+                                               <button 
+                                                  onClick={() => toggleImageSelection(url)}
+                                                  className="absolute top-1 right-1 bg-white/90 text-rose-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                               >
+                                                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                                                     <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                                                   </svg>
+                                               </button>
+                                           </div>
+                                       ))}
+                                   </div>
+                               </div>
+                           )}
+
+                           {/* Stock Gallery */}
+                           <div>
+                               <p className="text-sm font-medium text-slate-700 mb-2">Or choose from Stock Gallery</p>
+                               <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                                   {SAMPLE_IMAGES.map((img, idx) => (
+                                       <div 
+                                          key={idx} 
+                                          onClick={() => toggleImageSelection(img)}
+                                          className={`relative aspect-square cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${newListing.imageUrls?.includes(img) ? 'border-rose-500 ring-2 ring-rose-200 opacity-50' : 'border-transparent hover:border-slate-300'}`}
+                                       >
+                                           <img src={img} alt="Stock" className="w-full h-full object-cover" />
+                                            {newListing.imageUrls?.includes(img) && (
+                                               <div className="absolute inset-0 flex items-center justify-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-6 h-6 text-rose-600">
                                                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                                    </svg>
                                                </div>
-                                           </div>
-                                       )}
-                                   </div>
-                               ))}
+                                            )}
+                                       </div>
+                                   ))}
+                               </div>
                            </div>
-
+                           
                            <div className="pt-4 border-t border-slate-100">
                                <div className="bg-slate-50 p-4 rounded-lg">
                                    <h3 className="font-bold text-sm text-slate-700 uppercase mb-2">Review Listing</h3>
@@ -427,7 +493,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                                        <p><span className="font-medium">Title:</span> {newListing.name}</p>
                                        <p><span className="font-medium">Price:</span> €{newListing.price}/mo</p>
                                        <p><span className="font-medium">Location:</span> {newListing.address}</p>
-                                       <p><span className="font-medium">Photos selected:</span> {newListing.imageUrls?.length || 0}</p>
+                                       <p><span className="font-medium">Photos:</span> {newListing.imageUrls?.length || 0}</p>
                                    </div>
                                </div>
                            </div>
