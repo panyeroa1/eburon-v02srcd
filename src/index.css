@@ -1,0 +1,72 @@
+/* Global CSS Variables for Theme */
+:root {
+  --color-rose-500: #f43f5e;
+  --color-rose-600: #e11d48;
+  --color-rose-700: #be123c;
+  --color-pink-600: #db2777;
+  --color-pink-700: #be185d;
+  
+  /* Brand Gradient */
+  --gradient-brand: linear-gradient(to right, var(--color-rose-500), var(--color-pink-600));
+  --gradient-brand-hover: linear-gradient(to right, var(--color-rose-600), var(--color-pink-700));
+}
+
+/* Base Typography */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Consistent Button Styles */
+.btn-primary {
+  background: var(--gradient-brand);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--gradient-brand-hover);
+  box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Brand Logo Consistent Style */
+.brand-logo {
+  background: var(--color-rose-500);
+  border-radius: 0.5rem;
+}
+
+/* Scrollbar Styles */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Animations */
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Safe area padding for mobile */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
