@@ -489,6 +489,32 @@ const ClientPortal: React.FC = () => {
       loadListings(newFilters);
   };
 
+  const handleNearbyClick = () => {
+      if (!navigator.geolocation) {
+          alert("Geolocation is not supported by your browser");
+          return;
+      }
+
+      setAssistantReply("Locating you...");
+      navigator.geolocation.getCurrentPosition(
+          (position) => {
+              const { latitude, longitude } = position.coords;
+              const newFilters: ApartmentSearchFilters = {
+                  ...filters,
+                  userLocation: { lat: latitude, lng: longitude },
+                  sortBy: 'distance'
+              };
+              setFilters(newFilters);
+              loadListings(newFilters);
+              setAssistantReply("Found properties near you.");
+          },
+          (error) => {
+              console.error("Error getting location:", error);
+              setAssistantReply("Could not get your location.");
+          }
+      );
+  };
+
   return (
     <div className="flex flex-col h-screen bg-white relative">
 
@@ -594,6 +620,19 @@ const ClientPortal: React.FC = () => {
                                         <span className="text-xs font-semibold">{cat}</span>
                                     </button>
                                 ))}
+                                {/* Vertical Separator */}
+                                <div className="h-8 w-px bg-slate-200 mx-2"></div>
+
+                                {/* Nearby Filter */}
+                                <button 
+                                    onClick={handleNearbyClick}
+                                    className={`flex flex-col items-center gap-2 min-w-[64px] group transition-opacity ${filters.sortBy === 'distance' ? 'opacity-100 text-black border-b-2 border-black pb-2' : 'opacity-70 hover:opacity-100'}`}
+                                >
+                                    <div className="text-2xl opacity-60 group-hover:opacity-100 grayscale group-hover:grayscale-0">
+                                        📍
+                                    </div>
+                                    <span className="text-xs font-semibold">Nearby</span>
+                                </button>
                                 {/* Vertical Separator */}
                                 <div className="h-8 w-px bg-slate-200 mx-2"></div>
                                 
@@ -797,7 +836,7 @@ const ClientPortal: React.FC = () => {
 
       {/* Floating Mic Button - Desktop Only */}
       <div
-        className="hidden md:block floating-mic"
+        className="hidden md:block floating-mic z-50"
         style={{
           left: `${micPosition.x}px`,
           top: `${micPosition.y}px`,
@@ -808,23 +847,31 @@ const ClientPortal: React.FC = () => {
           onClick={() => isLiveActive ? stopLiveSession() : startLiveSession()}
           disabled={connectionStatus === 'connecting'}
           className={`
-            w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all
+            relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-100 ease-out
             ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}
             ${isLiveActive 
-              ? 'bg-gradient-to-br from-black to-slate-700 animate-pulse' 
+              ? 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-[0_0_30px_rgba(168,85,247,0.6)]' 
               : connectionStatus === 'connecting'
                 ? 'bg-slate-400'
                 : 'bg-black hover:shadow-xl hover:scale-110'
             }
           `}
+          style={{
+             transform: isLiveActive ? `scale(${1 + Math.min(volume * 2, 0.5)})` : 'scale(1)'
+          }}
           title={isLiveActive ? 'Stop Assistant' : 'Start Voice Assistant'}
           aria-label={isLiveActive ? 'Stop Assistant' : 'Start Voice Assistant'}
         >
+          {/* Inner Glow for Orb Effect */}
+          {isLiveActive && (
+              <div className="absolute inset-0 rounded-full bg-white opacity-20 blur-sm animate-pulse"></div>
+          )}
+
           {connectionStatus === 'connecting' ? (
             <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <svg
-              className="w-8 h-8 text-white"
+              className={`w-8 h-8 text-white relative z-10 transition-transform ${isLiveActive ? 'scale-90' : ''}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -838,21 +885,6 @@ const ClientPortal: React.FC = () => {
             </svg>
           )}
         </button>
-        
-        {/* Volume indicator */}
-        {isLiveActive && (
-          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
-            {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="voice-bar w-1 bg-white rounded-full"
-                style={{ 
-                  height: `${Math.max(4, volume > (i * 20) ? volume / 5 : 4)}px`,
-                }}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ export interface Listing {
   petsAllowed: boolean;
   isFavorite?: boolean;
   coordinates?: { lat: number; lng: number };
+  distance?: number; // Distance in km from user
 }
 
 export interface Reservation {
@@ -39,7 +40,8 @@ export type ApartmentSearchFilters = {
   petsAllowed?: boolean | null;
   type?: string | null;
   energyClassMin?: string | null;
-  sortBy?: "price_asc" | "price_desc" | "size" | "default" | null;
+  sortBy?: "price_asc" | "price_desc" | "size" | "distance" | "default" | null;
+  userLocation?: { lat: number; lng: number } | null;
 };
 
 // Simplified NLU response for the text fallback if needed

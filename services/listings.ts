@@ -52,24 +52,56 @@ export const searchListings = async (filters: ApartmentSearchFilters): Promise<L
     return [];
   }
 
-  // Map Supabase snake_case to camelCase if necessary, or ensure types match
-  // Our SQL schema uses snake_case for some fields (pets_allowed, image_urls)
-  // But our TS type uses camelCase (petsAllowed, imageUrls)
-  // We need to map them.
-  
-  return data.map((item: any) => ({
-    id: item.id,
-    name: item.name,
-    address: item.address,
-    price: item.price,
-    imageUrls: item.image_urls || [],
-    energyClass: item.energy_class,
-    type: item.type,
-    size: item.size,
-    description: item.description,
-    bedrooms: item.bedrooms,
-    petsAllowed: item.pets_allowed,
-    coordinates: item.coordinates,
-    isFavorite: false // Default, handled locally for now
-  }));
+  // Helper for Haversine distance (km)
+  const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+      const R = 6371; // Radius of the earth in km
+      const dLat = (lat2 - lat1) * (Math.PI / 180);
+      const dLon = (lon2 - lon1) * (Math.PI / 180);
+      const a = 
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+        Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+      return R * c;
+  };
+
+  let results: Listing[] = data.map((item: any) => {
+    let distance = undefined;
+    if (filters.userLocation && item.coordinates) {
+        distance = getDistance(
+            filters.userLocation.lat, 
+            filters.userLocation.lng, 
+            item.coordinates.lat, 
+            item.coordinates.lng
+        );
+    }
+
+    return {
+      id: item.id,
+      name: item.name,
+      address: item.address,
+      price: item.price,
+      imageUrls: item.image_urls || [],
+      energyClass: item.energy_class,
+      type: item.type,
+      size: item.size,
+      description: item.description,
+      bedrooms: item.bedrooms,
+      petsAllowed: item.pets_allowed,
+      coordinates: item.coordinates,
+      isFavorite: false, // Default, handled locally for now
+      distance: distance
+    };
+  });
+
+  // Client-side sorting for distance (since it's calculated dynamically)
+  if (filters.sortBy === 'distance') {
+      results.sort((a, b) => {
+          if (a.distance === undefined) return 1;
+          if (b.distance === undefined) return -1;
+          return a.distance - b.distance;
+      });
+  }
+
+  return results;
 };
