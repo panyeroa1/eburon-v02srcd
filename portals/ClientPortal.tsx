@@ -452,9 +452,65 @@ const ClientPortal: React.FC = () => {
   };
 
   return (
-    <div className="h-screen bg-white flex flex-col font-sans text-slate-900 overflow-hidden">
-      
-      {/* --- Top Search & Nav Bar --- */}
+    <div className="flex flex-col h-screen bg-white relative">
+      {/* Header - Airbnb Style */}
+      <header className="flex-none border-b border-slate-200 bg-white sticky top-0 z-30">
+        <div className="max-w-[2520px] mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-pink-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">E</span>
+              </div>
+              <span className="text-xl font-bold text-rose-600 hidden sm:block">eburon</span>
+            </div>
+
+            {/* Right side buttons */}
+            <div className="flex items-center gap-4">
+              {/* Be the Landlord */}
+              <a
+                href="/admin"
+                className="hidden md:block px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-full transition-colors"
+              >
+                Be the Landlord
+              </a>
+
+              {/* Login/Profile */}
+              {user ? (
+                <button
+                  onClick={handleProfileClick}
+                  className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-full hover:shadow-md transition-shadow"
+                >
+                  <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                  </svg>
+                  <div className="w-7 h-7 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-full hover:shadow-md transition-shadow"
+                >
+                  <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                  </svg>
+                  <div className="w-7 h-7 bg-slate-600 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
       <div className="flex-none px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white z-20">
           <div className="flex items-center gap-2">
              <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center text-white font-bold font-mono">E</div>
