@@ -176,15 +176,8 @@ const ClientPortal: React.FC = () => {
 
   const handleProfileClick = () => {
     if (user) {
-      setShowProfile(true);
-    } else {
-      setShowLogin(true);
-    }
-  };
-
-  const handleProfileClick = () => {
-    if (user) {
       setCurrentView('profile');
+      setShowProfile(true);
     } else {
       setShowLogin(true);
     }
