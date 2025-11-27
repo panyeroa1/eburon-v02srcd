@@ -518,6 +518,8 @@ const ClientPortal: React.FC = () => {
                 <button
                   onClick={handleProfileClick}
                   className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-full hover:shadow-md transition-shadow"
+                  title="Open Profile"
+                  aria-label="Open Profile"
                 >
                   <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -532,6 +534,8 @@ const ClientPortal: React.FC = () => {
                 <button
                   onClick={() => setShowLogin(true)}
                   className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-full hover:shadow-md transition-shadow"
+                  title="Sign In"
+                  aria-label="Sign In"
                 >
                   <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
