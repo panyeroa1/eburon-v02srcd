@@ -549,3 +549,64 @@ Test result:
 Known limitations or follow-up tasks:
 
 - None
+
+------------------------------------------------------------
+
+Task ID: T-0009
+Title: Replace floating mic icon with call icon
+Status: DONE
+Owner: Miles
+Related repo or service: homiesearch
+Branch: main
+Created: 2025-11-27 23:25
+Last updated: 2025-11-27 23:30
+
+START LOG
+
+Timestamp: 2025-11-27 23:25
+Current behavior or state:
+
+- Floating button uses a microphone SVG icon.
+
+Plan and scope for this task:
+
+- Replace the SVG path in `ClientPortal.tsx` with a phone/call icon.
+
+Files or modules expected to change:
+
+- portals/ClientPortal.tsx
+
+Risks or things to watch out for:
+
+- None
+
+WORK CHECKLIST
+
+- [x] Code changes implemented according to the defined scope
+- [x] No unrelated refactors or drive-by changes
+- [x] Configuration and environment variables verified
+- [ ] Database migrations or scripts documented if they exist
+- [x] Logs and error handling reviewed
+
+END LOG
+
+Timestamp: 2025-11-27 23:30
+Summary of what actually changed:
+
+- Replaced microphone SVG with phone/call SVG icon in the floating button.
+
+Files actually modified:
+
+- portals/ClientPortal.tsx
+
+How it was tested:
+
+- Verified code change (SVG path updated).
+
+Test result:
+
+- PASS
+
+Known limitations or follow-up tasks:
+
+- None
