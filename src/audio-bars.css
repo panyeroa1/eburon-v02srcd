@@ -1,8 +1,19 @@
-/* Audio visualization bars */
-.audio-bar {
-  width: 0.25rem;
-  background-color: rgb(244 63 94); /* rose-500 */
-  border-radius: 9999px;
-  transition: height 75ms;
-  height: var(--bar-height, 8px);
+/* Floating draggable mic button */
+.floating-mic {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  z-index: 50;
+  cursor: move;
+  touch-action: none;
+}
+
+.floating-mic.dragging {
+  opacity: 0.8;
+  transition: none;
+}
+
+/* Voice visualization bars */
+.voice-bar {
+  transition: height 0.1s ease;
 }

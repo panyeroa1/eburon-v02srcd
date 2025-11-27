@@ -127,6 +127,11 @@ const ClientPortal: React.FC = () => {
   const [isLiveActive, setIsLiveActive] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [volume, setVolume] = useState(0);
+  
+  // Floating mic state (for desktop)
+  const [micPosition, setMicPosition] = useState({ x: window.innerWidth - 120, y: window.innerHeight - 120 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   // --- Refs ---
   const inputAudioContextRef = useRef<AudioContext | null>(null);
@@ -181,6 +186,39 @@ const ClientPortal: React.FC = () => {
       setShowLogin(true);
     }
   };
+
+  // Floating mic drag handlers
+  const handleMicMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragOffset({
+      x: e.clientX - micPosition.x,
+      y: e.clientY - micPosition.y
+    });
+  };
+
+  const handleMicMouseMove = useCallback((e: MouseEvent) => {
+    if (isDragging) {
+      setMicPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y
+      });
+    }
+  }, [isDragging, dragOffset]);
+
+  const handleMicMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMicMouseMove);
+      window.addEventListener('mouseup', handleMicMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMicMouseMove);
+        window.removeEventListener('mouseup', handleMicMouseUp);
+      };
+    }
+  }, [isDragging, handleMicMouseMove, handleMicMouseUp]);
 
   const handleLoginSuccess = () => {
     setShowLogin(false);
@@ -459,10 +497,10 @@ const ClientPortal: React.FC = () => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-pink-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-black to-slate-700 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">E</span>
               </div>
-              <span className="text-xl font-bold text-rose-600 hidden sm:block">eburon</span>
+              <span className="text-xl font-bold text-black hidden sm:block">eburon</span>
             </div>
 
             {/* Right side buttons */}
@@ -484,7 +522,7 @@ const ClientPortal: React.FC = () => {
                   <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                   </svg>
-                  <div className="w-7 h-7 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full flex items-center justify-center">
+                  <div className="w-7 h-7 bg-gradient-to-br from-black to-slate-700 rounded-full flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -513,8 +551,8 @@ const ClientPortal: React.FC = () => {
       {/* Main Content */}
       <div className="flex-none px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white z-20">
           <div className="flex items-center gap-2">
-             <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center text-white font-bold font-mono">E</div>
-             <span className="font-bold text-xl text-rose-500 tracking-tight hidden sm:block">Eburon Realty</span>
+             <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold font-mono">E</div>
+             <span className="font-bold text-xl text-black tracking-tight hidden sm:block">Eburon Realty</span>
           </div>
 
           {/* Functional Search Bar */}
@@ -533,7 +571,7 @@ const ClientPortal: React.FC = () => {
                 type="submit"
                 title="Search"
                 aria-label="Search"
-                className="bg-rose-500 p-2 rounded-full text-white hover:bg-rose-600 transition-colors"
+                className="bg-black p-2 rounded-full text-white hover:bg-black transition-colors"
               >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -652,7 +690,7 @@ const ClientPortal: React.FC = () => {
                                                     setFilters({ sortBy: 'default' });
                                                     setSearchQuery('');
                                                 }}
-                                                className="mt-4 text-rose-500 underline"
+                                                className="mt-4 text-black underline"
                                             >
                                                 Clear filters
                                             </button>
@@ -737,7 +775,7 @@ const ClientPortal: React.FC = () => {
       <div className="flex-none bg-white border-t border-slate-200 py-3 flex justify-center gap-12 z-20">
           <button 
              onClick={() => { setCurrentView('explore'); setIsMapView(false); }}
-             className={`flex flex-col items-center gap-1 ${currentView === 'explore' && !isMapView ? 'text-rose-500' : 'text-slate-400 hover:text-slate-600'}`}
+             className={`flex flex-col items-center gap-1 ${currentView === 'explore' && !isMapView ? 'text-black' : 'text-slate-400 hover:text-slate-600'}`}
           >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={currentView === 'explore' && !isMapView ? 2.5 : 2} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -747,7 +785,7 @@ const ClientPortal: React.FC = () => {
 
           <button 
              onClick={() => { setCurrentView('explore'); setIsMapView(true); }}
-             className={`flex flex-col items-center gap-1 ${currentView === 'nearby' || isMapView ? 'text-rose-500' : 'text-slate-400 hover:text-slate-600'}`}
+             className={`flex flex-col items-center gap-1 ${currentView === 'nearby' || isMapView ? 'text-black' : 'text-slate-400 hover:text-slate-600'}`}
           >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={currentView === 'nearby' || isMapView ? 2.5 : 2} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -758,7 +796,7 @@ const ClientPortal: React.FC = () => {
 
           <button 
              onClick={handleMicClick}
-             className={`relative -top-6 bg-rose-500 hover:bg-rose-600 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 ${connectionStatus === 'connecting' ? 'animate-pulse' : ''}`}
+             className={`relative -top-6 bg-black hover:bg-black text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 ${connectionStatus === 'connecting' ? 'animate-pulse' : ''}`}
           >
              {isLiveActive ? (
                  <div className="w-6 h-6 flex items-center justify-center">
@@ -773,7 +811,7 @@ const ClientPortal: React.FC = () => {
 
           <button 
              onClick={() => { setCurrentView('favorites'); setIsMapView(false); }}
-             className={`flex flex-col items-center gap-1 ${currentView === 'favorites' ? 'text-rose-500' : 'text-slate-400 hover:text-slate-600'}`}
+             className={`flex flex-col items-center gap-1 ${currentView === 'favorites' ? 'text-black' : 'text-slate-400 hover:text-slate-600'}`}
           >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={currentView === 'favorites' ? 2.5 : 2} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
@@ -783,7 +821,7 @@ const ClientPortal: React.FC = () => {
 
           <button 
             onClick={handleProfileClick}
-            className={`flex flex-col items-center gap-1 ${currentView === 'profile' ? 'text-rose-600' : 'text-slate-600'}`}
+            className={`flex flex-col items-center gap-1 ${currentView === 'profile' ? 'text-black' : 'text-slate-600'}`}
             aria-label="Profile"
           >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -794,7 +832,7 @@ const ClientPortal: React.FC = () => {
       </div>
 
       {/* Admin Link - Subtle */}
-      <div className="absolute bottom-2 right-4">
+      <div className="absolute bottom-2 right-4 md:bottom-4 md:right-6">
         <a
           href="/admin"
           className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
@@ -803,7 +841,68 @@ const ClientPortal: React.FC = () => {
           Admin
         </a>
       </div>
+
+      {/* Floating Mic Button - Desktop Only */}
+      <div
+        className="hidden md:block floating-mic"
+        style={{
+          left: `${micPosition.x}px`,
+          top: `${micPosition.y}px`,
+        }}
+        onMouseDown={handleMicMouseDown}
+      >
+        <button
+          onClick={toggleLiveSession}
+          disabled={connectionStatus === 'connecting'}
+          className={`
+            w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all
+            ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}
+            ${isLiveActive 
+              ? 'bg-gradient-to-br from-black to-slate-700 animate-pulse' 
+              : connectionStatus === 'connecting'
+                ? 'bg-slate-400'
+                : 'bg-black hover:shadow-xl hover:scale-110'
+            }
+          `}
+          title={isLiveActive ? 'Stop Assistant' : 'Start Voice Assistant'}
+          aria-label={isLiveActive ? 'Stop Assistant' : 'Start Voice Assistant'}
+        >
+          {connectionStatus === 'connecting' ? (
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <svg
+              className="w-8 h-8 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+              />
+            </svg>
+          )}
+        </button>
+        
+        {/* Volume indicator */}
+        {isLiveActive && (
+          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="voice-bar w-1 bg-white rounded-full"
+                style={{ 
+                  height: `${Math.max(4, volume > (i * 20) ? volume / 5 : 4)}px`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
+  </div>
   );
 };
 
