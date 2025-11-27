@@ -1,48 +1,49 @@
-import React, { useEffect, useState } from 'react';
-import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+```typescript
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
-import AdminLogin from '../components/admin/Login';
+import AdminAuth from '../components/admin/Auth';
 import Dashboard from '../components/admin/Dashboard';
 import UserManagement from '../components/admin/UserManagement';
 import CreateListing from '../components/admin/CreateListing';
 import MaintenanceDashboard from '../components/admin/MaintenanceDashboard';
-import { LayoutDashboard, Users, Building, Wrench } from 'lucide-react';
+import { LayoutDashboard, Users, Building, Wrench, LogOut } from 'lucide-react';
 
 const AdminPortal: React.FC = () => {
-  const [session, setSession] = useState<any>(null);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (!session && location.pathname !== '/login') {
-          navigate('/login');
-      }
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session && location.pathname !== '/login') {
-          navigate('/login');
-      }
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, location.pathname]);
+  }, []);
 
   const handleLogout = async () => {
       await supabase.auth.signOut();
       navigate('/login');
   };
 
-  if (!session && location.pathname === '/login') {
-      return <AdminLogin />;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600"></div>
+      </div>
+    );
   }
 
-  if (!session) return null;
+  if (!user) {
+    return <AdminAuth onAuthSuccess={() => {}} />;
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">

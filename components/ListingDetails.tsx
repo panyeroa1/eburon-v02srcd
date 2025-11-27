@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Listing } from '../types';
 import { saveReservation } from '../services/mockDb';
-import TenantLogin from './tenant/Login';
+import TenantAuth from './tenant/Auth';
 import { supabase } from '../services/supabase';
 
 interface ListingDetailsProps {
@@ -261,7 +261,7 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => 
 
           {/* Login Prompt Modal */}
           {showLoginPrompt && (
-            <TenantLogin 
+            <TenantAuth 
               onLoginSuccess={() => {
                 setShowLoginPrompt(false);
                 setShowBookingForm(true);

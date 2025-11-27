@@ -6,7 +6,7 @@ import { searchListings } from '../services/listings';
 import { parseUserUtterance } from '../services/gemini';
 import { ApartmentSearchFilters, Listing } from '../types';
 import { GoogleGenAI, LiveServerMessage, Modality, FunctionDeclaration, Type } from '@google/genai';
-import TenantLogin from '../components/tenant/Login';
+import TenantAuth from '../components/tenant/Auth';
 import Profile from '../components/tenant/Profile';
 import { supabase } from '../services/supabase';
 import '../src/audio-bars.css';
@@ -677,9 +677,9 @@ const ClientPortal: React.FC = () => {
       )}
 
       {/* --- Login Modal --- */}
-      {showLogin && (
-          <TenantLogin onLoginSuccess={handleLoginSuccess} onCancel={() => setShowLogin(false)} />
-      )}
+        {showLogin && !user && (
+          <TenantAuth onLoginSuccess={handleLoginSuccess} onCancel={() => setShowLogin(false)} />
+        )}
 
       {/* --- Bottom Navigation --- */}
       <div className="flex-none bg-white border-t border-slate-200 py-3 flex justify-center gap-12 z-20">
