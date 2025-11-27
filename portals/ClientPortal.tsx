@@ -737,6 +737,16 @@ const ClientPortal: React.FC = () => {
           </button>
       </div>
 
+      {/* Admin Link - Subtle */}
+      <div className="absolute bottom-2 right-4">
+        <a
+          href="/admin"
+          className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+          title="Admin Portal"
+        >
+          Admin
+        </a>
+      </div>
     </div>
   );
 };
