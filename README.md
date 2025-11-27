@@ -67,7 +67,7 @@ API_KEY=your_ai_api_key
 ```bash
 # The schema creates:
 # - listings table (properties)
-# - user_profiles table (user data with roles)
+# - users table (user data with roles)
 # - maintenance_requests table (tenant requests)
 # All with Row Level Security (RLS) policies
 ```
@@ -94,10 +94,11 @@ In Supabase Dashboard → Authentication → Users:
 Then in SQL Editor, add the user profile:
 
 ```sql
-INSERT INTO public.user_profiles (id, email, full_name, role)
+INSERT INTO public.users (id, email, full_name, name, role)
 VALUES (
   'user_id_from_auth_table',
   'admin@eburon.ai',
+  'Admin User',
   'Admin User',
   'admin'
 );

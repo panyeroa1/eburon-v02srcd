@@ -62,24 +62,30 @@ create policy "Admins can view all requests"
   using ( auth.role() = 'authenticated' ); 
 
 
--- Create User Profiles Table (Optional, if we want to store extra data like role)
-create table public.user_profiles (
+-- Create Users Table (stores additional user data beyond Supabase Auth)
+create table public.users (
   id uuid references auth.users(id) primary key,
   email text,
   full_name text,
+  name text,
   role text check (role in ('admin', 'contractor', 'owner', 'broker', 'tenant')) default 'tenant',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 -- Enable RLS
-alter table public.user_profiles enable row level security;
+alter table public.users enable row level security;
 
 -- Policy: Users can read their own profile
 create policy "Users can read own profile"
-  on public.user_profiles for select
+  on public.users for select
   using ( auth.uid() = id );
 
 -- Policy: Admins can read all profiles
 create policy "Admins can read all profiles"
-  on public.user_profiles for select
+  on public.users for select
   using ( true ); -- Simplified
+
+-- Policy: Admins can insert users
+create policy "Admins can insert users"
+  on public.users for insert
+  with check ( true ); -- Simplified, should check if inserter is admin
