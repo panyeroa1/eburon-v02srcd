@@ -1,4 +1,3 @@
-```
 import React, { useState } from 'react';
 import { Listing } from '../types';
 import { saveReservation } from '../services/mockDb';
@@ -11,17 +10,16 @@ interface ListingDetailsProps {
 }
 
 const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [customerDetails, setCustomerDetails] = useState({
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [isReserving, setIsReserving] = useState(false);
+  const [reserved, setReserved] = useState(false);
 
   const handleBookingClick = async () => {
     // Check if user is logged in
@@ -38,7 +36,7 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => 
 
   const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      if (!customerDetails.name || !customerDetails.email) {
+      if (!formData.name || !formData.email) {
           alert("Please fill in at least your Name and Email.");
           return;
       }
@@ -150,7 +148,7 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => 
                   <div className="text-xs font-semibold underline mt-1">Available now</div>
               </div>
               <button 
-                  onClick={() => setShowForm(true)}
+                  onClick={handleBookingClick}
                   disabled={reserved}
                   className={`
                     font-semibold py-3 px-8 rounded-lg shadow-md transform transition-all 
@@ -257,6 +255,17 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => 
                     )}
                 </div>
             </div>
+          )}
+
+          {/* Login Prompt Modal */}
+          {showLoginPrompt && (
+            <TenantLogin 
+              onLoginSuccess={() => {
+                setShowLoginPrompt(false);
+                setShowBookingForm(true);
+              }}
+              onCancel={() => setShowLoginPrompt(false)}
+            />
           )}
       </div>
     </div>

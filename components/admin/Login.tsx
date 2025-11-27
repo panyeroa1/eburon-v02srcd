@@ -105,4 +105,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default AdminLogin;
+export default Login;
