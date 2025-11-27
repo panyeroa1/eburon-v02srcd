@@ -1,0 +1,8 @@
+/* Audio visualization bars */
+.audio-bar {
+  width: 0.25rem;
+  background-color: rgb(244 63 94); /* rose-500 */
+  border-radius: 9999px;
+  transition: height 75ms;
+  height: var(--bar-height, 8px);
+}

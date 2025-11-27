@@ -1,19 +1,11 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Access environment variables
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = 'https://gsjnucljnnqtsjllfufy.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzam51Y2xqbm5xdHNqbGxmdWZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMzQzNTYsImV4cCI6MjA3OTgxMDM1Nn0.DbjToxlF-k5lTG-SS0fYsE3OyL9KD9byFbuBSVzDF6k';
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const isSupabaseConfigured = (): boolean => {
-    return !!supabaseUrl && supabaseUrl.length > 0 && !!supabaseKey && supabaseKey.length > 0;
+  return !!(supabaseUrl && supabaseAnonKey);
 };
-
-// Create a single supabase client for interacting with your database.
-// If config is missing, we use a mock object to prevent the app from crashing on load.
-// The service layer checks isSupabaseConfigured() before attempting to use this client.
-export const supabase = (isSupabaseConfigured()
-    ? createClient(supabaseUrl!, supabaseKey!)
-    : {
-        from: () => ({ select: () => ({}), insert: () => ({}), upload: () => ({}) }),
-        storage: { from: () => ({ upload: () => ({}), getPublicUrl: () => ({}) }) }
-      }) as unknown as SupabaseClient;

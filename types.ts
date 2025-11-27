@@ -54,3 +54,25 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
 }
+
+export type UserRole = 'admin' | 'contractor' | 'owner' | 'broker' | 'tenant';
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  role: UserRole;
+  name: string;
+}
+
+export interface MaintenanceRequest {
+  id: string;
+  tenantId: string;
+  propertyId: string; // listingId
+  propertyName: string;
+  description: string;
+  type: 'plumbing' | 'electric' | 'general' | 'other';
+  status: 'open' | 'pending' | 'resolved';
+  createdAt: string;
+  assignedTo?: string; // contractorId
+  imageUrl?: string;
+}

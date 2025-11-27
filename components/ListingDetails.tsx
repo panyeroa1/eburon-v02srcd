@@ -1,7 +1,9 @@
-
+```
 import React, { useState } from 'react';
 import { Listing } from '../types';
 import { saveReservation } from '../services/mockDb';
+import TenantLogin from './tenant/Login';
+import { supabase } from '../services/supabase';
 
 interface ListingDetailsProps {
   listing: Listing;
@@ -9,19 +11,34 @@ interface ListingDetailsProps {
 }
 
 const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => {
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [customerDetails, setCustomerDetails] = useState({
     name: '',
     email: '',
     phone: '',
     message: ''
   });
-  const [isReserving, setIsReserving] = useState(false);
-  const [reserved, setReserved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleBookingClick = async () => {
+    // Check if user is logged in
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // User is logged in, show booking form
+      setShowBookingForm(true);
+    } else {
+      // User not logged in, show login prompt
+      setShowLoginPrompt(true);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      if (!formData.name || !formData.email) {
+      if (!customerDetails.name || !customerDetails.email) {
           alert("Please fill in at least your Name and Email.");
           return;
       }
@@ -148,13 +165,13 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => 
           </div>
 
           {/* Reservation Form Overlay */}
-          {showForm && (
+          {showBookingForm && (
             <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center">
                 <div className="bg-white w-full h-[90%] sm:h-auto sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-2xl p-6 overflow-y-auto animate-fade-in-up flex flex-col">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-slate-900">Contact Host</h2>
                         <button 
-                            onClick={() => setShowForm(false)}
+                            onClick={() => setShowBookingForm(false)}
                             className="p-2 hover:bg-slate-100 rounded-full transition-colors"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-slate-500">
@@ -163,7 +180,7 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => 
                         </button>
                     </div>
 
-                    {!reserved ? (
+                    {!submitted ? (
                         <form onSubmit={handleSubmit} className="space-y-4 flex-1">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
