@@ -3,13 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Lead, Property, User, Ticket, Invoice, Message } from '../../types-admin';
 import { MOCK_NOTIFICATIONS } from '../../constants-admin';
 import { db } from '../../services/admin/db';
+import AgentConfig from './AgentConfig';
 import { 
   User as UserIcon, Phone, Mail, Clock, MapPin, DollarSign, Home, CheckCircle, 
   ChevronRight, Search, Play, Pause, X, Send, PhoneIncoming, 
   PhoneMissed, Voicemail, LayoutDashboard, Calendar as CalendarIcon, FileText, 
   PieChart, Settings, Inbox as InboxIcon, Briefcase, Megaphone, Receipt,
   Menu, ChevronLeft, ChevronDown, Wrench, HardHat, Bell, LogOut, Shield,
-  Plus, Filter, Download, ArrowUpRight, ArrowDownLeft
+  Plus, Filter, Download, ArrowUpRight, ArrowDownLeft, Bot
 } from 'lucide-react';
 
 interface CRMProps {
@@ -22,7 +23,7 @@ interface CRMProps {
   onLogout: () => void;
 }
 
-type TabType = 'dashboard' | 'leads' | 'properties' | 'inbox' | 'calendar' | 'documents' | 'finance' | 'marketing' | 'analytics' | 'settings' | 'maintenance' | 'requests' | 'my-home' | 'jobs' | 'schedule' | 'invoices';
+type TabType = 'dashboard' | 'leads' | 'properties' | 'inbox' | 'calendar' | 'documents' | 'finance' | 'marketing' | 'analytics' | 'settings' | 'maintenance' | 'requests' | 'my-home' | 'jobs' | 'schedule' | 'invoices' | 'agent-config';
 
 const CRM: React.FC<CRMProps> = ({ leads, properties, onSelectLead, selectedLeadId, onUpdateLead, currentUser, onLogout }) => {
   const [tab, setTab] = useState<TabType>('dashboard');
@@ -517,6 +518,7 @@ const CRM: React.FC<CRMProps> = ({ leads, properties, onSelectLead, selectedLead
                     <div className="px-3 space-y-0.5">
                         <NavItem id="documents" label="Documents" icon={FileText} />
                         <NavItem id="finance" label="Finance" icon={Receipt} />
+                        <NavItem id="agent-config" label="AI Agents" icon={Bot} />
                     </div>
                 </>
              )}
@@ -618,6 +620,7 @@ const CRM: React.FC<CRMProps> = ({ leads, properties, onSelectLead, selectedLead
                     {tab === 'documents' && <DocumentsView />}
                     {tab === 'finance' && <FinanceView />}
                     {(tab === 'maintenance' || tab === 'requests' || tab === 'jobs') && <MaintenanceView />}
+                    {tab === 'agent-config' && <AgentConfig currentUserId={currentUser.id} />}
                     
                     {/* Placeholder for less critical tabs to save code space */}
                     {['marketing', 'analytics', 'settings', 'my-home'].includes(tab) && (

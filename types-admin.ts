@@ -92,3 +92,41 @@ export interface Message {
   read: boolean;
   threadId: string;
 }
+
+export interface BlandAIConfig {
+  phone_number: string;
+  voice: string;
+  wait_for_greeting: boolean;
+  record: boolean;
+  answered_by_enabled: boolean;
+  noise_cancellation: boolean;
+  interruption_threshold: number;
+  block_interruptions: boolean;
+  max_duration: number;
+  model: string;
+  memory_id: string;
+  language: string;
+  background_track: string;
+  endpoint: string;
+  voicemail_action: string;
+  isCallActive: boolean;
+  task: string;
+  first_sentence: string;
+  temperature: number;
+  from: string;
+  tools: string[];
+}
+
+export interface Agent {
+  id: string;
+  name: string;
+  voice_id?: string;
+  intro?: string;
+  roles?: string;
+  prompt: string;
+  bland_config: BlandAIConfig;
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
