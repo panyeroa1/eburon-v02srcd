@@ -1,4 +1,4 @@
-# Eburon Realty - Home Management Platform
+# Eburon Estate - Home Management Platform
 
 A comprehensive dual-portal property management system built for modern real estate operations in Belgium. Features an Admin Portal for property managers and a Client Portal for property seekers with AI-powered voice search.
 
@@ -43,8 +43,8 @@ A comprehensive dual-portal property management system built for modern real est
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/panyeroa1/homiesearch.git
-cd homiesearch
+git clone https://github.com/panyeroa1/Eburon Estate.git
+cd Eburon Estate
 npm install
 ```
 
@@ -124,7 +124,7 @@ Visit:
 ## 📁 Project Structure
 
 ```
-homiesearch/
+Eburon Estate/
 ├── components/
 │   ├── admin/              # Admin Portal components
 │   │   ├── Dashboard.tsx
@@ -196,7 +196,7 @@ Five user roles with different permissions:
 The app automatically routes based on hostname:
 
 - `homeadmin.eburon.ai` → Admin Portal
-- `homiesearch.eburon.ai` → Client Portal
+- `Eburon Estate.eburon.ai` → Client Portal
 - `localhost` → Shows portal selector (dev mode)
 
 ### Security Features

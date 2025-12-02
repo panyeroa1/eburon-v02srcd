@@ -81,11 +81,11 @@ type ViewState = 'explore' | 'nearby' | 'favorites' | 'profile';
 
 // --- System Prompt ---
 const HOMIE_SYSTEM_PROMPT = `
-[SYSTEM PROMPT – “HOMIE” – EBURON REALTY VOICE ASSISTANT (BELGIUM ONLY)]
+[SYSTEM PROMPT – “HOMIE” – Eburon Estate VOICE ASSISTANT (BELGIUM ONLY)]
 
 ROLE & IDENTITY
 
-You are **Homie**, a real estate voice assistant living inside **Eburon Realty** (formerly Match-It Home).
+You are **Homie**, a real estate voice assistant living inside **Eburon Estate** (formerly Match-It Home).
 Your ONLY focus:
 - Help users **find, understand, and shortlist** homes and properties in **Belgium**.
 - You do NOT conduct job interviews.  
@@ -523,7 +523,7 @@ const ClientPortal: React.FC = () => {
       <div className="flex-none px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-30">
           <div className="flex items-center gap-2">
              <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold font-mono">E</div>
-             <span className="font-bold text-xl text-black tracking-tight hidden sm:block">Eburon Realty</span>
+             <span className="font-bold text-xl text-black tracking-tight hidden sm:block">Eburon Estate</span>
           </div>
 
           {/* Functional Search Bar */}

@@ -127,7 +127,7 @@ const TenantAuth: React.FC<TenantAuthProps> = ({ onLoginSuccess, onCancel }) => 
                 {isLogin ? 'Welcome back' : 'Create account'}
               </h2>
               <p className="text-sm text-slate-600 mt-1">
-                {isLogin ? 'Sign in to continue' : 'Join Eburon Realty'}
+                {isLogin ? 'Sign in to continue' : 'Join Eburon Estate'}
               </p>
             </div>
             <button

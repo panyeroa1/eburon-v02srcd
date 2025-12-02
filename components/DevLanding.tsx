@@ -30,7 +30,7 @@ const DevLanding: React.FC = () => {
           className="px-8 py-4 bg-rose-500 text-white rounded-xl shadow-lg hover:scale-105 transition-transform"
         >
           <h2 className="text-xl font-bold mb-2">Client Portal</h2>
-          <p className="text-sm text-rose-200">homiesearch.eburon.ai</p>
+          <p className="text-sm text-rose-200">Eburon Estate.eburon.ai</p>
         </button>
       </div>
 

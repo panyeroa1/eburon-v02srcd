@@ -4,7 +4,7 @@ Task ID: T-0001
 Title: Remove duplicated mic and header
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: Eburon Estate
 Branch: main
 Created: 2025-11-27 22:30
 Last updated: 2025-11-27 22:35
@@ -72,7 +72,7 @@ Task ID: T-0002
 Title: Fix missing dependencies and markdown lints
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: Eburon Estate
 Branch: main
 Created: 2025-11-27 22:38
 Last updated: 2025-11-27 22:42
@@ -139,7 +139,7 @@ Task ID: T-0003
 Title: Push changes to GitHub
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: Eburon Estate
 Branch: main
 Created: 2025-11-27 22:45
 Last updated: 2025-11-27 22:48
@@ -203,7 +203,7 @@ Task ID: T-0004
 Title: Update floating mic design to animated orb
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: Eburon Estate
 Branch: main
 Created: 2025-11-27 22:50
 Last updated: 2025-11-27 22:55
@@ -273,7 +273,7 @@ Task ID: T-0005
 Title: Add user location permission for nearby property insights
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: Eburon Estate
 Branch: main
 Created: 2025-11-27 22:58
 Last updated: 2025-11-27 23:02
@@ -349,7 +349,7 @@ Task ID: T-0006
 Title: Redesign Listing Details page to match Airbnb style
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: Eburon Estate
 Branch: main
 Created: 2025-11-27 23:05
 Last updated: 2025-11-27 23:10
@@ -406,7 +406,7 @@ Task ID: T-0008
 Title: Fix remaining lint errors (booking modal & tasks.md)
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: Eburon Estate
 Branch: main
 Created: 2025-11-27 23:20
 Last updated: 2025-11-27 23:20
@@ -492,7 +492,7 @@ Task ID: T-0007
 Title: Fix accessibility lint errors in ListingDetails
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: Eburon Estate
 Branch: main
 Created: 2025-11-27 23:15
 Last updated: 2025-11-27 23:15
@@ -556,7 +556,7 @@ Task ID: T-0009
 Title: Replace floating mic icon with call icon
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: Eburon Estate
 Branch: main
 Created: 2025-11-27 23:25
 Last updated: 2025-11-27 23:30
@@ -602,6 +602,162 @@ Files actually modified:
 How it was tested:
 
 - Verified code change (SVG path updated).
+
+Test result:
+
+- PASS
+
+Known limitations or follow-up tasks:
+
+- None
+
+------------------------------------------------------------
+
+Task ID: T-0010
+Title: Replace Admin Portal with CRM and Dialer
+Status: DONE
+Owner: Miles
+Related repo or service: Eburon Estate
+Branch: main
+Created: 2025-12-02 18:35
+Last updated: 2025-12-02 18:45
+
+START LOG
+
+Timestamp: 2025-12-02 18:35
+Current behavior or state:
+
+- Admin portal is a basic placeholder.
+- Need to integrate full CRM and Dialer functionality from `admin-home` project.
+
+Plan and scope for this task:
+
+- Copy types, constants, and services from `admin-home` to `Eburon Estate-5`.
+- Create `Auth`, `CRM`, and `Dialer` components in `Eburon Estate-5`.
+- Update `AdminPortal.tsx` to use the new components.
+- Ensure all imports are correct and build passes.
+
+Files or modules expected to change:
+
+- portals/AdminPortal.tsx
+- components/admin-replacement/*
+- services/admin/*
+- types-admin.ts
+- constants-admin.ts
+
+Risks or things to watch out for:
+
+- Missing dependencies (e.g. `@google/genai`).
+- Import path errors.
+- Environment variable configuration.
+
+WORK CHECKLIST
+
+- [x] Code changes implemented according to the defined scope
+- [x] No unrelated refactors or drive-by changes
+- [x] Configuration and environment variables verified
+- [ ] Database migrations or scripts documented if they exist
+- [x] Logs and error handling reviewed
+
+END LOG
+
+Timestamp: 2025-12-02 18:45
+Summary of what actually changed:
+
+- Created `types-admin.ts` and `constants-admin.ts`.
+- Implemented `db.ts`, `audioUtils.ts`, and `geminiService.ts` in `services/admin/`.
+- Created `Auth`, `CRM`, and `Dialer` components in `components/admin-replacement/`.
+- Overwrote `AdminPortal.tsx` to integrate the new CRM and Dialer.
+- Added `.env.example` for Gemini API key configuration.
+
+Files actually modified:
+
+- portals/AdminPortal.tsx
+- components/admin-replacement/Auth.tsx
+- components/admin-replacement/CRM.tsx
+- components/admin-replacement/Dialer.tsx
+- services/admin/db.ts
+- services/admin/audioUtils.ts
+- services/admin/geminiService.ts
+- types-admin.ts
+- constants-admin.ts
+- .env.example
+
+How it was tested:
+
+- Ran `npm run build` to verify TypeScript compilation and dependency resolution.
+- Verified that all new files were created with correct content.
+
+Test result:
+
+- PASS
+
+Known limitations or follow-up tasks:
+
+- User needs to set `VITE_GEMINI_API_KEY` in `.env` for the dialer to work.
+- Supabase tables need to be set up for full persistence (currently falls back to mock data/local state).
+
+------------------------------------------------------------
+
+Task ID: T-0011
+Title: Expand Mock Data and Improve CRM UX
+Status: DONE
+Owner: Miles
+Related repo or service: homiesearch
+Branch: main
+Created: 2025-12-02 19:15
+Last updated: 2025-12-02 19:20
+
+START LOG
+
+Timestamp: 2025-12-02 19:15
+Current behavior or state:
+
+- Mock data is limited (only a few properties).
+- Property list is basic.
+- User requested 50+ properties and smoother UX.
+
+Plan and scope for this task:
+
+- Update `constants-admin.ts` to generate 60 mock properties.
+- Update `CRM.tsx` to display properties in a responsive grid.
+- Add hover effects and smooth scrolling.
+
+Files or modules expected to change:
+
+- constants-admin.ts
+- components/admin-replacement/CRM.tsx
+
+Risks or things to watch out for:
+
+- Performance with larger lists (though 60 is small enough).
+
+WORK CHECKLIST
+
+- [x] Code changes implemented according to the defined scope
+- [x] No unrelated refactors or drive-by changes
+- [x] Configuration and environment variables verified
+- [ ] Database migrations or scripts documented if they exist
+- [x] Logs and error handling reviewed
+
+END LOG
+
+Timestamp: 2025-12-02 19:20
+Summary of what actually changed:
+
+- Replaced static `MOCK_PROPERTIES` with a generator function creating 60 items.
+- Updated `CRM.tsx` to use a responsive grid for properties.
+- Added `scroll-smooth` and hover animations to property cards.
+
+Files actually modified:
+
+- constants-admin.ts
+- components/admin-replacement/CRM.tsx
+
+How it was tested:
+
+- Ran `npm run build` to verify code integrity.
+- Verified code changes for logic correctness.
 
 Test result:
 

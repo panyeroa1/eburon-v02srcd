@@ -162,7 +162,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
               </button>
            </form>
            <button onClick={onBack} className="w-full mt-4 text-slate-500 text-sm hover:underline text-center">
-               Back to Eburon Realty
+               Back to Eburon Estate
            </button>
         </div>
       </div>

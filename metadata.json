@@ -1,5 +1,5 @@
 {
-  "name": "Eburon Realty",
+  "name": "Eburon Estate",
   "description": "Voice-enabled real estate assistant for Belgium powered by Gemini.",
   "requestFramePermissions": [
     "microphone",
