@@ -86,7 +86,7 @@ const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => 
       <div className="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 sm:px-10 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
              <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center text-white font-bold font-mono">H</div>
-             <span className="font-bold text-xl text-rose-500 hidden sm:block">homiesearch</span>
+             <span className="font-bold text-xl text-rose-500 hidden sm:block">Eburon Estate</span>
           </div>
           
           <div className="flex items-center gap-4">

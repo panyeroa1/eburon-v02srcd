@@ -81,11 +81,11 @@ type ViewState = 'explore' | 'nearby' | 'favorites' | 'profile';
 
 // --- System Prompt ---
 const HOMIE_SYSTEM_PROMPT = `
-[SYSTEM PROMPT – “HOMIE” – EBURON REALTY VOICE ASSISTANT (BELGIUM ONLY)]
+[SYSTEM PROMPT – “HOMIE” – Eburon Estate VOICE ASSISTANT (BELGIUM ONLY)]
 
 ROLE & IDENTITY
 
-You are **Homie**, a real estate voice assistant living inside **Eburon Realty** (formerly Match-It Home).
+You are **Homie**, a real estate voice assistant living inside **Eburon Estate** (formerly Match-It Home).
 Your ONLY focus:
 - Help users **find, understand, and shortlist** homes and properties in **Belgium**.
 - You do NOT conduct job interviews.  
@@ -109,10 +109,14 @@ USE THE 'updateSearchFilters' TOOL WHENEVER THE USER EXPRESSES A PREFERENCE FOR 
 After using the tool, tell the user how many homes you found and ask if they want to see the first one.
 `;
 
+import { Download, Save, Trash2, X, AlertCircle, Loader2 } from 'lucide-react'; // Ensure Loader2 is imported if not already available in lucide-react imports above or add separate import
+
 const ClientPortal: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('explore');
   const [isMapView, setIsMapView] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [isNavigatingToAdmin, setIsNavigatingToAdmin] = useState(false);
   const [user, setUser] = useState<any>(null);
 
   // --- State for Homes ---
@@ -183,6 +187,7 @@ const ClientPortal: React.FC = () => {
     if (user) {
       setCurrentView('profile');
     } else {
+      setAuthMode('login');
       setShowLogin(true);
     }
   };
@@ -523,7 +528,7 @@ const ClientPortal: React.FC = () => {
       <div className="flex-none px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-30">
           <div className="flex items-center gap-2">
              <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold font-mono">E</div>
-             <span className="font-bold text-xl text-black tracking-tight hidden sm:block">Eburon Realty</span>
+             <span className="font-bold text-xl text-black tracking-tight hidden sm:block">Eburon Estate</span>
           </div>
 
           {/* Functional Search Bar */}
@@ -552,12 +557,38 @@ const ClientPortal: React.FC = () => {
 
           <div className="flex items-center gap-4">
                {/* Be the Landlord */}
-               <a
-                 href="/admin"
-                 className="hidden md:block px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-full transition-colors"
+               {/* Be the Landlord */}
+               <button
+                 onClick={() => {
+                    setIsNavigatingToAdmin(true);
+                    setTimeout(() => {
+                        window.location.href = '/admin';
+                    }, 800);
+                 }}
+                 disabled={isNavigatingToAdmin}
+                 className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                >
-                 Be the Landlord
-               </a>
+                 {isNavigatingToAdmin ? (
+                    <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Loading...</span>
+                    </>
+                 ) : (
+                    <span>Be the Landlord</span>
+                 )}
+               </button>
+
+               {!user && (
+                   <button
+                     onClick={() => {
+                         setAuthMode('signup');
+                         setShowLogin(true);
+                     }}
+                     className="hidden md:block px-4 py-2 text-sm font-bold text-white bg-black hover:bg-slate-800 rounded-full transition-colors shadow-lg hover:shadow-xl"
+                   >
+                     Sign Up
+                   </button>
+               )}
 
                <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 overflow-hidden cursor-pointer" onClick={handleProfileClick}>
                   <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'Guest'}`} alt="User" />
@@ -760,7 +791,11 @@ const ClientPortal: React.FC = () => {
 
       {/* --- Login Modal --- */}
         {showLogin && !user && (
-          <TenantAuth onLoginSuccess={handleLoginSuccess} onCancel={() => setShowLogin(false)} />
+          <TenantAuth 
+            onLoginSuccess={handleLoginSuccess} 
+            onCancel={() => setShowLogin(false)} 
+            initialMode={authMode}
+          />
         )}
 
       {/* --- Bottom Navigation --- */}

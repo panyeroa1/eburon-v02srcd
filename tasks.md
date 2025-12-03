@@ -1,612 +1,206 @@
-# Tasks
+[tasks.md]
+
+You are Miles, the developer from Eburon Development.
+Every change you make must be traceable through clear, written logs in this file.
+
+GLOBAL CODING RULES (TOP 5)
+
+1. Understand before you touch anything
+   - Read the task, existing code, and recent commits or logs before writing new code.
+   - If something is unclear, write a clarification note in the task log before proceeding.
+
+2. Limit scope strictly to the task
+   - Do not refactor or change unrelated code.
+   - Only touch files and functions directly required to complete the current task.
+
+3. Make small, reversible changes
+   - Break work into small steps that are easy to revert.
+   - Prefer many small, focused commits instead of one large commit.
+
+4. Tests and verification are mandatory
+   - For every task, describe how you tested it in the end log.
+   - If automated tests exist, run them and record the result.
+   - If there are no tests, describe manual verification steps clearly.
+
+5. Logging before and after every task (non-negotiable)
+   - Before doing any work on a task, write a start log that explains what you plan to do, the scope, and potential risks.
+   - After finishing the task, write an end log that explains what you actually changed, how you tested it, and any follow-ups.
+   - No task is considered done if there is no start log and end log.
+
+------------------------------------------------------------
+STANDARD TASK BLOCK
+------------------------------------------------------------
 
 Task ID: T-0001
-Title: Remove duplicated mic and header
+Title: Add Agent Config Tab to Admin Area
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: homiesearch-5
 Branch: main
-Created: 2025-11-27 22:30
-Last updated: 2025-11-27 22:35
+Created: 2025-12-02 23:53
+Last updated: 2025-12-02 23:53
 
 START LOG
 
-Timestamp: 2025-11-27 22:30
+Timestamp: 2025-12-02 23:53
 Current behavior or state:
-
-- User reports duplicated mic and header.
-- Need to investigate App.tsx and components to identify the cause.
+- Admin portal has CRM with multiple tabs (dashboard, leads, properties, etc.)
+- No agent configuration functionality exists
+- Bland AI integration is needed for voice agent creation
 
 Plan and scope for this task:
-
-- Analyze App.tsx and related components.
-- Remove duplicate instances of header and microphone elements.
+- Create a new Supabase table schema for storing AI agent configurations
+- Add 'agent-config' tab type to CRM
+- Create AgentConfig component with form for agent configuration
+- Implement Bland AI API integration service
+- Save agent configs to Supabase
+- Display list of saved agents
+- Allow CRUD operations on agents
 
 Files or modules expected to change:
-
-- App.tsx
-- components/ (likely Header or Mic related components)
+- supabase_schema.sql (add agents table)
+- components/admin-replacement/CRM.tsx (add new tab)
+- components/admin-replacement/AgentConfig.tsx (new file)
+- services/blandAI.ts (new file)
+- types-admin.ts (add Agent type)
+- .env.example (add Bland AI credentials)
 
 Risks or things to watch out for:
-
-- Ensure functionality remains after removal.
+- Bland AI API authorization headers need to be stored securely
+- Sensitive data should not be exposed in frontend
+- Need to handle API errors gracefully
+- Large task field needs proper UI handling
 
 WORK CHECKLIST
 
-- [x] Code changes implemented according to the defined scope
-- [x] No unrelated refactors or drive-by changes
-- [x] Configuration and environment variables verified
-- [ ] Database migrations or scripts documented if they exist
-- [x] Logs and error handling reviewed
+- [x] Add agents table to Supabase schema
+- [x] Add Agent type to types-admin.ts
+- [x] Create Bland AI service
+- [x] Create AgentConfig component
+- [x] Add agent-config tab to CRM
+- [x] Update .env.example with Bland AI credentials
+- [x] Install axios dependency
+- [x] Update Supabase credentials to match requirements
+- [x] Create comprehensive README documentation
+- [x] Test app compilation and startup
 
 END LOG
 
-Timestamp: 2025-11-27 22:35
+Timestamp: 2025-12-02 23:58
 Summary of what actually changed:
-
-- Removed the redundant "Airbnb Style" header in ClientPortal.tsx.
-- Updated the main content header to be sticky and include the "Be the Landlord" link.
-- Hid the bottom navigation microphone button on desktop to avoid duplication with the floating mic.
+- Added `agents` table schema to `supabase_schema.sql` with full RLS policies
+- Created `Agent` and `BlandAIConfig` TypeScript interfaces in `types-admin.ts`
+- Implemented `BlandAIService` in `services/blandAI.ts` for API integration
+- Built comprehensive `AgentConfig` component with CRUD operations and call functionality
+- Integrated agent-config tab into CRM navigation (Management section for BROKER role)
+- Updated Supabase credentials to use provided URL and keys
+- Added axios package for HTTP requests
+- Created detailed AGENT_CONFIG_README.md with setup and usage instructions
 
 Files actually modified:
-
-- portals/ClientPortal.tsx
+- supabase_schema.sql (added agents table and policies)
+- types-admin.ts (added BlandAIConfig and Agent interfaces)
+- services/blandAI.ts (new file - Bland AI API service)
+- components/admin-replacement/AgentConfig.tsx (new file - UI component)
+- components/admin-replacement/CRM.tsx (added agent-config tab and navigation)
+- services/supabase.ts (updated credentials)
+- .env.example (added Bland AI environment variables)
+- package.json (axios added via npm install)
+- AGENT_CONFIG_README.md (new file - comprehensive documentation)
 
 How it was tested:
-
-- Verified code structure changes.
-- Checked that the remaining header has the necessary links and sticky behavior.
-- Checked that the bottom mic button has the `md:hidden` class.
+- Code compiles without TypeScript errors
+- App starts successfully on localhost:3001
+- Dependencies installed correctly (axios)
+- All imports resolve properly
+- Component integration verified through build process
 
 Test result:
-
-- PASS
+PASS - Application builds and runs successfully
 
 Known limitations or follow-up tasks:
-
-- None
+- User needs to run SQL schema in Supabase to create agents table
+- Bland AI credentials are currently hardcoded - should move to environment variables for production
+- Need to test actual agent creation once Supabase table is created
+- Consider adding validation for phone number formats
+- May want to add agent preview/test functionality before saving
+- Could add agent templates for common use cases
 
 ------------------------------------------------------------
 
 Task ID: T-0002
-Title: Fix missing dependencies and markdown lints
+Title: Commit pending changes for Admin Portal and Voice Services
 Status: DONE
 Owner: Miles
-Related repo or service: homiesearch
+Related repo or service: homiesearch-5
 Branch: main
-Created: 2025-11-27 22:38
-Last updated: 2025-11-27 22:42
+Created: 2025-12-03 20:35
+Last updated: 2025-12-03 20:36
 
 START LOG
 
-Timestamp: 2025-11-27 22:38
+Timestamp: 2025-12-03 20:35
 Current behavior or state:
-
-- IDE reports missing modules 'react-router-dom' and '@google/genai'.
-- Markdown linter reports spacing issues in tasks.md.
+- There are multiple modified and untracked files in the repository.
+- Changes involve Admin Portal, CRM, Bland AI service, and Gemini services.
+- User requested to commit these changes before proceeding.
 
 Plan and scope for this task:
-
-- Run npm install to ensure dependencies are installed.
-- Fix markdown formatting in tasks.md.
+- Stage all changes (git add .)
+- Commit changes with a descriptive message.
 
 Files or modules expected to change:
-
-- tasks.md
-- package-lock.json (potentially)
+- components/admin-final/Auth.tsx
+- components/admin-final/CRM.tsx
+- components/admin-final/Dialer.tsx
+- constants-admin-final.ts
+- portals/AdminPortal.tsx
+- services/admin-final/audioUtils.ts
+- services/admin-final/blandService.ts
+- services/admin-final/db.ts
+- services/admin-final/geminiService.ts
+- components/admin-final/WebCall.tsx
+- services/admin-final/geminiLiveService.ts
+- supabaseClient.ts
+- .hintrc
 
 Risks or things to watch out for:
-
-- None
+- Ensure all necessary files are included.
 
 WORK CHECKLIST
 
-- [x] Code changes implemented according to the defined scope
-- [x] No unrelated refactors or drive-by changes
-- [x] Configuration and environment variables verified
-- [ ] Database migrations or scripts documented if they exist
-- [x] Logs and error handling reviewed
+- [x] Stage files
+- [x] Commit files
 
 END LOG
 
-Timestamp: 2025-11-27 22:42
+Timestamp: 2025-12-03 20:36
 Summary of what actually changed:
-
-- Ran `npm install` to install missing dependencies (`react-router-dom`, `@google/genai`).
-- Fixed markdown lint errors in `tasks.md` by adding blank lines before lists.
+- Staged all modified and untracked files.
+- Committed changes with message "Update Admin Portal, CRM, and Voice Services".
 
 Files actually modified:
-
-- tasks.md
-- package-lock.json
+- components/admin-final/Auth.tsx
+- components/admin-final/CRM.tsx
+- components/admin-final/Dialer.tsx
+- constants-admin-final.ts
+- portals/AdminPortal.tsx
+- services/admin-final/audioUtils.ts
+- services/admin-final/blandService.ts
+- services/admin-final/db.ts
+- services/admin-final/geminiService.ts
+- components/admin-final/WebCall.tsx
+- services/admin-final/geminiLiveService.ts
+- supabaseClient.ts
+- .hintrc
 
 How it was tested:
-
-- Verified `npm install` success.
-- Verified `tasks.md` format.
+- git status check
+- git commit execution
 
 Test result:
-
 - PASS
 
 Known limitations or follow-up tasks:
-
 - None
 
-------------------------------------------------------------
-
-Task ID: T-0003
-Title: Push changes to GitHub
-Status: DONE
-Owner: Miles
-Related repo or service: homiesearch
-Branch: main
-Created: 2025-11-27 22:45
-Last updated: 2025-11-27 22:48
-
-START LOG
-
-Timestamp: 2025-11-27 22:45
-Current behavior or state:
-
-- Local changes fixed duplicated header/mic and lints.
-- Changes are not yet on the remote repo (and thus not on Vercel).
-
-Plan and scope for this task:
-
-- Stage and commit changes.
-- Push to origin main.
-
-Files or modules expected to change:
-
-- None (git operations only)
-
-Risks or things to watch out for:
-
-- None
-
-WORK CHECKLIST
-
-- [x] Code changes implemented according to the defined scope
-- [x] No unrelated refactors or drive-by changes
-- [x] Configuration and environment variables verified
-- [ ] Database migrations or scripts documented if they exist
-- [x] Logs and error handling reviewed
-
-END LOG
-
-Timestamp: 2025-11-27 22:48
-Summary of what actually changed:
-
-- Staged and committed changes to `ClientPortal.tsx` and `tasks.md`.
-- Pushed changes to `origin main`.
-
-Files actually modified:
-
-- None (git operations only)
-
-How it was tested:
-
-- Verified git push success.
-
-Test result:
-
-- PASS
-
-Known limitations or follow-up tasks:
-
-- None
-
-------------------------------------------------------------
-
-Task ID: T-0004
-Title: Update floating mic design to animated orb
-Status: DONE
-Owner: Miles
-Related repo or service: homiesearch
-Branch: main
-Created: 2025-11-27 22:50
-Last updated: 2025-11-27 22:55
-
-START LOG
-
-Timestamp: 2025-11-27 22:50
-Current behavior or state:
-
-- Floating mic is a simple black circle.
-- Animation is a simple pulse or external bars.
-
-Plan and scope for this task:
-
-- Change floating mic style to look like a glowing orb.
-- Implement real-time animation based on voice volume (scaling/glowing).
-- Keep the icon inside.
-
-Files or modules expected to change:
-
-- portals/ClientPortal.tsx
-
-Risks or things to watch out for:
-
-- Ensure drag functionality still works.
-- Performance of real-time animation.
-
-WORK CHECKLIST
-
-- [x] Code changes implemented according to the defined scope
-- [x] No unrelated refactors or drive-by changes
-- [x] Configuration and environment variables verified
-- [ ] Database migrations or scripts documented if they exist
-- [x] Logs and error handling reviewed
-
-END LOG
-
-Timestamp: 2025-11-27 22:55
-Summary of what actually changed:
-
-- Updated floating mic button to have a gradient background (indigo/purple/pink) and glow effect when active.
-- Added real-time scaling animation based on `volume` state.
-- Removed the external volume bars below the mic.
-- Added inner glow/pulse effect.
-
-Files actually modified:
-
-- portals/ClientPortal.tsx
-
-How it was tested:
-
-- Verified code changes.
-- Checked that the `transform: scale(...)` logic uses the existing `volume` state.
-- Verified that the button reverts to black/slate when inactive/connecting.
-
-Test result:
-
-- PASS
-
-Known limitations or follow-up tasks:
-
-- None
-
-------------------------------------------------------------
-
-Task ID: T-0005
-Title: Add user location permission for nearby property insights
-Status: DONE
-Owner: Miles
-Related repo or service: homiesearch
-Branch: main
-Created: 2025-11-27 22:58
-Last updated: 2025-11-27 23:02
-
-START LOG
-
-Timestamp: 2025-11-27 22:58
-Current behavior or state:
-
-- No location permission request.
-- "Map" view just shows all listings (or filtered ones).
-- No "Nearby" specific logic.
-
-Plan and scope for this task:
-
-- Implement `navigator.geolocation` request.
-- Add a "Nearby" button or integrate into the Map view.
-- Calculate distance from user to listings.
-- Sort/Filter listings by distance when "Nearby" is active.
-
-Files or modules expected to change:
-
-- portals/ClientPortal.tsx
-- services/listings.ts (maybe for distance calc)
-- types.ts (to add distance field to Listing if needed)
-
-Risks or things to watch out for:
-
-- User denying permission.
-- Browser compatibility (standard API, should be fine).
-
-WORK CHECKLIST
-
-- [x] Code changes implemented according to the defined scope
-- [x] No unrelated refactors or drive-by changes
-- [x] Configuration and environment variables verified
-- [ ] Database migrations or scripts documented if they exist
-- [x] Logs and error handling reviewed
-
-END LOG
-
-Timestamp: 2025-11-27 23:02
-Summary of what actually changed:
-
-- Added `distance` field to `Listing` type and `userLocation` to `ApartmentSearchFilters`.
-- Implemented Haversine distance calculation in `searchListings` service.
-- Added "Nearby" button in `ClientPortal` category list that requests geolocation.
-- When location is granted, listings are sorted by distance.
-
-Files actually modified:
-
-- types.ts
-- services/listings.ts
-- portals/ClientPortal.tsx
-
-How it was tested:
-
-- Verified "Nearby" button appears.
-- Verified clicking it triggers browser location prompt.
-- Verified `searchListings` logic (code review).
-
-Test result:
-
-- PASS
-
-Known limitations or follow-up tasks:
-
-- None
-
-------------------------------------------------------------
-
-Task ID: T-0006
-Title: Redesign Listing Details page to match Airbnb style
-Status: DONE
-Owner: Miles
-Related repo or service: homiesearch
-Branch: main
-Created: 2025-11-27 23:05
-Last updated: 2025-11-27 23:10
-
-START LOG
-
-Timestamp: 2025-11-27 23:05
-Current behavior or state:
-
-- Listing details is a simple modal with one image and basic info.
-- Layout is single column.
-
-Plan and scope for this task:
-
-- Implement 5-image grid layout (1 main, 4 side).
-- Create 2-column layout for desktop (Details left, Sticky Booking Card right).
-- Add Host info, Highlights, and Amenities sections (mocked where data missing).
-- Style the Booking Card to match the reference (Price, Date/Guest inputs, Reserve button).
-- Use Lucide icons for better visuals.
-
-Files or modules expected to change:
-
-- components/ListingDetails.tsx
-
-Risks or things to watch out for:
-
-- Responsive design (must still work on mobile).
-- Image aspect ratios.
-
-WORK CHECKLIST
-
-- [x] Code changes implemented according to the defined scope
-- [x] No unrelated refactors or drive-by changes
-- [x] Configuration and environment variables verified
-- [ ] Database migrations or scripts documented if they exist
-- [x] Logs and error handling reviewed
-
-END LOG
-
-Timestamp: 2025-11-27 23:10
-Summary of what actually changed:
-
-- Redesigned `ListingDetails.tsx` to be a full-screen overlay mimicking a dedicated page.
-- Implemented a 5-image grid layout (1 large, 4 small) using CSS Grid.
-- Created a 2-column layout for desktop:
-  - Left: Listing details, host info, highlights, description, amenities.
-  - Right: Sticky booking card with price breakdown and "Reserve" button.
-- Added Lucide icons for a polished look.
-- Mocked missing data (reviews, host info) to match the visual design.
-
-------------------------------------------------------------
-
-Task ID: T-0008
-Title: Fix remaining lint errors (booking modal & tasks.md)
-Status: DONE
-Owner: Miles
-Related repo or service: homiesearch
-Branch: main
-Created: 2025-11-27 23:20
-Last updated: 2025-11-27 23:20
-
-START LOG
-
-Timestamp: 2025-11-27 23:20
-Current behavior or state:
-
-- Booking modal close button missing title/aria-label.
-- Indentation warning in tasks.md.
-
-Plan and scope for this task:
-
-- Add accessibility attributes to booking modal close button.
-- Fix markdown list indentation.
-
-Files or modules expected to change:
-
-- components/ListingDetails.tsx
-- tasks.md
-
-Risks or things to watch out for:
-
-- None
-
-WORK CHECKLIST
-
-- [x] Code changes implemented according to the defined scope
-- [x] No unrelated refactors or drive-by changes
-- [x] Configuration and environment variables verified
-- [ ] Database migrations or scripts documented if they exist
-- [x] Logs and error handling reviewed
-
-END LOG
-
-Timestamp: 2025-11-27 23:20
-Summary of what actually changed:
-
-- Added `title` and `aria-label` to booking modal close button.
-- Fixed indentation in `tasks.md` summary.
-
-Files actually modified:
-
-- components/ListingDetails.tsx
-- tasks.md
-
-How it was tested:
-
-- Verified code changes.
-
-Test result:
-
-- PASS
-
-Known limitations or follow-up tasks:
-
-- None
-
-Files actually modified:
-
-- components/ListingDetails.tsx
-
-How it was tested:
-
-- Verified layout structure matches the provided Airbnb reference image.
-- Verified responsive behavior (stacking on mobile, side-by-side on desktop).
-- Verified "Reserve" flow still works (opens booking modal).
-
-Test result:
-
-- PASS
-
-Known limitations or follow-up tasks:
-
-- Date picker in the booking card is static/mocked.
-- Price breakdown is static (based on 5 nights).
-- Reviews and Host info are hardcoded mocks.
-
-------------------------------------------------------------
-
-Task ID: T-0007
-Title: Fix accessibility lint errors in ListingDetails
-Status: DONE
-Owner: Miles
-Related repo or service: homiesearch
-Branch: main
-Created: 2025-11-27 23:15
-Last updated: 2025-11-27 23:15
-
-START LOG
-
-Timestamp: 2025-11-27 23:15
-Current behavior or state:
-
-- Missing title/aria-label attributes on buttons.
-- Missing placeholder attributes on form inputs.
-
-Plan and scope for this task:
-
-- Add title and aria-label attributes to Save and Close buttons.
-- Add placeholder attributes to name, email, and message form fields.
-
-Files or modules expected to change:
-
-- components/ListingDetails.tsx
-
-Risks or things to watch out for:
-
-- None
-
-WORK CHECKLIST
-
-- [x] Code changes implemented according to the defined scope
-- [x] No unrelated refactors or drive-by changes
-- [x] Configuration and environment variables verified
-- [ ] Database migrations or scripts documented if they exist
-- [x] Logs and error handling reviewed
-
-END LOG
-
-Timestamp: 2025-11-27 23:15
-Summary of what actually changed:
-
-- Added `title` and `aria-label` to Save and Close buttons.
-- Added `placeholder` attributes to form inputs.
-
-Files actually modified:
-
-- components/ListingDetails.tsx
-
-How it was tested:
-
-- Verified code changes (accessibility attributes added).
-
-Test result:
-
-- PASS
-
-Known limitations or follow-up tasks:
-
-- None
-
-------------------------------------------------------------
-
-Task ID: T-0009
-Title: Replace floating mic icon with call icon
-Status: DONE
-Owner: Miles
-Related repo or service: homiesearch
-Branch: main
-Created: 2025-11-27 23:25
-Last updated: 2025-11-27 23:30
-
-START LOG
-
-Timestamp: 2025-11-27 23:25
-Current behavior or state:
-
-- Floating button uses a microphone SVG icon.
-
-Plan and scope for this task:
-
-- Replace the SVG path in `ClientPortal.tsx` with a phone/call icon.
-
-Files or modules expected to change:
-
-- portals/ClientPortal.tsx
-
-Risks or things to watch out for:
-
-- None
-
-WORK CHECKLIST
-
-- [x] Code changes implemented according to the defined scope
-- [x] No unrelated refactors or drive-by changes
-- [x] Configuration and environment variables verified
-- [ ] Database migrations or scripts documented if they exist
-- [x] Logs and error handling reviewed
-
-END LOG
-
-Timestamp: 2025-11-27 23:30
-Summary of what actually changed:
-
-- Replaced microphone SVG with phone/call SVG icon in the floating button.
-
-Files actually modified:
-
-- portals/ClientPortal.tsx
-
-How it was tested:
-
-- Verified code change (SVG path updated).
-
-Test result:
-
-- PASS
-
-Known limitations or follow-up tasks:
-
-- None

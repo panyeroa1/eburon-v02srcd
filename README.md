@@ -1,10 +1,11 @@
-# Eburon Realty - Home Management Platform
+# Eburon Estate - Home Management Platform
 
 A comprehensive dual-portal property management system built for modern real estate operations in Belgium. Features an Admin Portal for property managers and a Client Portal for property seekers with AI-powered voice search.
 
 ## 🌟 Features
 
 ### Client Portal (Public-Facing)
+
 - **AI Voice Assistant** - "Homie" - Natural language property search using voice commands
 - **Smart Search** - Filter by location, price, size, bedrooms, pet-friendly, and more
 - **Interactive Map View** - Visualize properties on a map with real-time filtering
@@ -15,6 +16,7 @@ A comprehensive dual-portal property management system built for modern real est
 - **No Login Required** - Browse properties freely; login only needed for booking
 
 ### Admin Portal (Management)
+
 - **Dashboard** - Overview of properties, users, and maintenance requests
 - **User Management** - Invite and manage users with role-based access (Admin, Contractor, Owner, Broker, Tenant)
 - **Property Management** - Create, edit, and manage property listings
@@ -33,7 +35,7 @@ A comprehensive dual-portal property management system built for modern real est
 
 ## 📋 Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - Supabase account (free tier works)
 - Modern browser with microphone access (for voice features)
@@ -43,8 +45,8 @@ A comprehensive dual-portal property management system built for modern real est
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/panyeroa1/homiesearch.git
-cd homiesearch
+git clone https://github.com/panyeroa1/Eburon Estate.git
+cd Eburon Estate
 npm install
 ```
 
@@ -111,20 +113,22 @@ npm run dev
 ```
 
 Visit:
-- **Client Portal**: `http://localhost:5173` (public homepage)
-- **Admin Portal**: `http://localhost:5173/admin` (login required)
-- **Dev Launcher**: `http://localhost:5173` (shows both portal links in dev mode)
+
+- **Client Portal**: <http://localhost:5173> (public homepage)
+- **Admin Portal**: <http://localhost:5173/admin> (login required)
+- **Dev Launcher**: <http://localhost:5173> (shows both portal links in dev mode)
 
 ## 🔐 Default Admin Credentials
 
 **Pre-filled in login form:**
+
 - Email: `admin@eburon.ai`
 - Password: `123456`
 
 ## 📁 Project Structure
 
-```
-homiesearch/
+```text
+Eburon Estate/
 ├── components/
 │   ├── admin/              # Admin Portal components
 │   │   ├── Dashboard.tsx
@@ -167,12 +171,13 @@ npm run seed       # Seed database with properties
 
 The AI voice assistant allows users to search for properties using natural language:
 
-```
+```text
 User: "Find me a 2-bedroom apartment in Ghent under €1000"
 Homie: "I found 12 properties matching your criteria..."
 ```
 
 **How it works:**
+
 1. User clicks microphone button
 2. Real-time audio streaming to AI
 3. Natural language understanding
@@ -196,7 +201,7 @@ Five user roles with different permissions:
 The app automatically routes based on hostname:
 
 - `homeadmin.eburon.ai` → Admin Portal
-- `homiesearch.eburon.ai` → Client Portal
+- `Eburon Estate.eburon.ai` → Client Portal
 - `localhost` → Shows portal selector (dev mode)
 
 ### Security Features
@@ -264,6 +269,7 @@ vercel
 ```
 
 **Environment Variables in Vercel:**
+
 - Add all `.env.local` variables in Vercel Dashboard
 - Set Build Command: `npm run build`
 - Set Output Directory: `dist`
@@ -282,10 +288,10 @@ Add environment variables in Netlify Dashboard → Site Settings → Environment
 
 ## 📚 Additional Resources
 
-- **Supabase Docs**: https://supabase.com/docs
-- **React Router**: https://reactrouter.com
-- **Vite**: https://vitejs.dev
-- **Tailwind CSS**: https://tailwindcss.com
+- **Supabase Docs**: <https://supabase.com/docs>
+- **React Router**: <https://reactrouter.com>
+- **Vite**: <https://vitejs.dev>
+- **Tailwind CSS**: <https://tailwindcss.com>
 
 ## 🤝 Contributing
 
@@ -306,4 +312,4 @@ Built by the Eburon Development team for modern property management.
 
 ---
 
-**Need help?** Contact: admin@eburon.ai
+**Need help?** Contact: <admin@eburon.ai>

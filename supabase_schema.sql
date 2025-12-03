@@ -89,3 +89,41 @@ create policy "Admins can read all profiles"
 create policy "Admins can insert users"
   on public.users for insert
   with check ( true ); -- Simplified, should check if inserter is admin
+
+
+-- Create Agents Table (for Bland AI voice agent configurations)
+create table public.agents (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  voice_id text,
+  intro text,
+  roles text,
+  prompt text not null,
+  bland_config jsonb not null, -- Full Bland AI configuration
+  created_by uuid references auth.users(id),
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Enable RLS
+alter table public.agents enable row level security;
+
+-- Policy: Authenticated users can read all agents
+create policy "Authenticated users can read agents"
+  on public.agents for select
+  using ( auth.role() = 'authenticated' );
+
+-- Policy: Authenticated users can insert agents
+create policy "Authenticated users can insert agents"
+  on public.agents for insert
+  with check ( auth.role() = 'authenticated' );
+
+-- Policy: Users can update their own agents
+create policy "Users can update own agents"
+  on public.agents for update
+  using ( auth.uid() = created_by );
+
+-- Policy: Users can delete their own agents
+create policy "Users can delete own agents"
+  on public.agents for delete
+  using ( auth.uid() = created_by );
