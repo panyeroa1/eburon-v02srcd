@@ -1,6 +1,6 @@
 
-import { AgentPersona } from '../types';
-import { BLAND_AUTH, BLAND_SETTINGS, generateSystemPrompt } from '../constants';
+import { AgentPersona } from '../../types-admin-final';
+import { BLAND_AUTH, BLAND_SETTINGS, generateSystemPrompt } from '../../constants-admin-final';
 
 export class BlandService {
   
