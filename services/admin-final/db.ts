@@ -1,11 +1,12 @@
 
-import { supabase } from '../../services/supabase';
-import { Lead, Property, Ticket, User, UserRole } from '../../types-admin';
-import { MOCK_LEADS, MOCK_PROPERTIES } from '../../constants-admin';
+import { supabase } from '../../supabaseClient';
+import { Lead, Property, Ticket, User, UserRole, Task, AgentPersona } from '../../types-admin-final';
+import { MOCK_LEADS, MOCK_PROPERTIES, DEFAULT_AGENT_PERSONA } from '../../constants-admin-final';
 
 // MOCK DATA FALLBACKS (In case DB tables don't exist yet)
 let localLeads = [...MOCK_LEADS];
 let localProperties = [...MOCK_PROPERTIES];
+let localAgents = [DEFAULT_AGENT_PERSONA];
 let localTickets: Ticket[] = [
   {
     id: 't1', title: 'Leaking Faucet', description: 'Kitchen sink dripping constantly.', 
@@ -17,6 +18,10 @@ let localTickets: Ticket[] = [
     status: 'SCHEDULED', priority: 'HIGH', propertyId: '102', propertyAddress: 'Meir 24, 2000 Antwerpen', 
     createdBy: 'u2', createdAt: new Date(Date.now() - 86400000).toISOString(), assignedTo: 'c1'
   }
+];
+let localTasks: Task[] = [
+    { id: 'tk1', title: 'Prepare Contract for Sophie', dueDate: new Date(Date.now() + 86400000).toISOString(), completed: false, leadId: '1', leadName: 'Sophie Dubois', priority: 'HIGH' },
+    { id: 'tk2', title: 'Follow up on inspection', dueDate: new Date(Date.now() + 172800000).toISOString(), completed: false, priority: 'MEDIUM' }
 ];
 
 export const db = {
@@ -99,5 +104,58 @@ export const db = {
       try {
           await supabase.from('tickets').insert(ticket);
       } catch (e) {}
+  },
+
+  // --- TASKS ---
+  async getTasks(): Promise<Task[]> {
+      try {
+          const { data, error } = await supabase.from('tasks').select('*');
+          if(error) throw error;
+          return data as Task[];
+      } catch (e) {
+          return localTasks;
+      }
+  },
+
+  async createTask(task: Task) {
+      localTasks.push(task);
+      try {
+          await supabase.from('tasks').insert(task);
+      } catch(e) {
+          console.log('DB: Create Task failed, using local');
+      }
+  },
+
+  async updateTask(task: Task) {
+      localTasks = localTasks.map(t => t.id === task.id ? task : t);
+      try {
+          await supabase.from('tasks').upsert(task);
+      } catch(e) {}
+  },
+
+  // --- AGENTS ---
+  async getAgents(): Promise<AgentPersona[]> {
+    try {
+        const { data, error } = await supabase.from('agents').select('*');
+        if (error) throw error;
+        return data as AgentPersona[];
+    } catch (e) {
+        return localAgents;
+    }
+  },
+
+  async createAgent(agent: AgentPersona) {
+      const existingIndex = localAgents.findIndex(a => a.id === agent.id);
+      if (existingIndex >= 0) {
+          localAgents[existingIndex] = agent;
+      } else {
+          localAgents.push(agent);
+      }
+
+      try {
+          await supabase.from('agents').upsert(agent);
+      } catch (e) {
+          console.log('DB: Agent save failed, using local');
+      }
   }
 };

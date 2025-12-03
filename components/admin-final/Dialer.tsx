@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
-import { Phone, Mic, MicOff, PhoneOff, Disc, Delete, Search, User, X, Check } from 'lucide-react';
-import { CallState, Lead } from '../../types-admin';
+import React, { useState, useEffect, useRef } from 'react';
+import { Phone, Mic, MicOff, PhoneOff, Disc, Delete, Search, User, X, Check, Bot } from 'lucide-react';
+import { CallState, Lead, AgentPersona } from '../../types-admin-final';
 
 interface DialerProps {
   callState: CallState;
@@ -15,6 +15,9 @@ interface DialerProps {
   isRecording: boolean;
   leads: Lead[];
   onLeadSelected: (lead: Lead) => void;
+  agents: AgentPersona[];
+  selectedAgentId: string;
+  onSelectAgent: (agentId: string) => void;
 }
 
 const Dialer: React.FC<DialerProps> = ({
@@ -28,13 +31,21 @@ const Dialer: React.FC<DialerProps> = ({
   onToggleRecording,
   isRecording,
   leads,
-  onLeadSelected
+  onLeadSelected,
+  agents,
+  selectedAgentId,
+  onSelectAgent
 }) => {
   const [dialNumber, setDialNumber] = useState(activeLeadPhone || '');
   const [isMuted, setIsMuted] = useState(false);
   const [duration, setDuration] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showAgentSelector, setShowAgentSelector] = useState(false);
+
+  // Refs for Long Press Logic (0 -> +)
+  const longPressTimerRef = useRef<any>(null);
+  const isLongPressRef = useRef(false);
 
   useEffect(() => {
     if (activeLeadPhone) {
@@ -75,6 +86,37 @@ const Dialer: React.FC<DialerProps> = ({
       setShowSearch(false);
   };
 
+  // --- Long Press Logic for '0' ---
+  const handlePressStart = (key: string) => {
+    if (key !== '0') return;
+    isLongPressRef.current = false;
+    longPressTimerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      if (callState === CallState.IDLE) {
+         setDialNumber(prev => prev + '+');
+         // Haptic feedback if available
+         if (navigator.vibrate) navigator.vibrate(50);
+      }
+    }, 500); // 500ms threshold
+  };
+
+  const handlePressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const handlePadButtonAction = (key: string) => {
+      // If it was a long press on 0, the '+' is already added by the timer.
+      // We must prevent the default click from adding '0'.
+      if (key === '0' && isLongPressRef.current) {
+          isLongPressRef.current = false; // Reset
+          return;
+      }
+      handlePadClick(key);
+  };
+
   const filteredLeads = leads.filter(l => 
       l.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || 
       l.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,6 +126,8 @@ const Dialer: React.FC<DialerProps> = ({
   const activeVisualizerHeight = Math.min(100, outputVolume * 200);
   const inputVisualizerHeight = Math.min(100, inputVolume * 200);
 
+  const selectedAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
+
   return (
     <div className="flex flex-col h-full bg-white text-slate-900 rounded-[3rem] overflow-hidden shadow-2xl border-[8px] border-slate-900 relative ring-4 ring-slate-300 box-content">
       {/* Dynamic Island / Header */}
@@ -91,14 +135,55 @@ const Dialer: React.FC<DialerProps> = ({
         <div className="bg-black rounded-full px-5 py-2 flex items-center justify-center gap-3 transition-all duration-300 ease-in-out min-w-[100px] h-[30px]">
              {callState === CallState.ACTIVE && (
                  <div className="flex gap-1 items-end h-3">
-                     <div className="w-1 bg-green-500 animate-pulse h-3 rounded-full"></div>
-                     <div className="w-1 bg-green-500 animate-pulse h-2 rounded-full animation-delay-75"></div>
-                     <div className="w-1 bg-green-500 animate-pulse h-4 rounded-full animation-delay-150"></div>
+                     <div className="w-1 bg-slate-500 animate-pulse h-3 rounded-full"></div>
+                     <div className="w-1 bg-slate-500 animate-pulse h-2 rounded-full animation-delay-75"></div>
+                     <div className="w-1 bg-slate-500 animate-pulse h-4 rounded-full animation-delay-150"></div>
+                 </div>
+             )}
+             {callState === CallState.RINGING && (
+                 <div className="flex gap-1 items-center h-3">
+                     <Phone className="w-3 h-3 text-white animate-pulse" fill="currentColor"/>
                  </div>
              )}
              {isRecording && <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>}
         </div>
       </div>
+
+      {/* Agent Selector Overlay */}
+      {showAgentSelector && (
+          <div className="absolute inset-0 z-[60] bg-white/95 backdrop-blur-sm p-6 flex flex-col animate-in fade-in zoom-in-95">
+              <div className="flex justify-between items-center mb-6 mt-10">
+                  <h3 className="font-bold text-slate-800">Select Calling Agent</h3>
+                  <button onClick={() => setShowAgentSelector(false)} className="p-2 bg-slate-100 rounded-full"><X className="w-5 h-5 text-slate-600"/></button>
+              </div>
+              <div className="overflow-y-auto flex-1 space-y-2 no-scrollbar">
+                  {agents.map(agent => (
+                      <button
+                        key={agent.id}
+                        onClick={() => {
+                            onSelectAgent(agent.id || 'default');
+                            setShowAgentSelector(false);
+                        }}
+                        className={`w-full p-4 rounded-xl text-left border transition-all ${
+                            selectedAgentId === agent.id 
+                            ? 'bg-slate-50 border-slate-500 shadow-sm' 
+                            : 'bg-white border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                          <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${selectedAgentId === agent.id ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-500'}`}>
+                                  <Bot className="w-5 h-5"/>
+                              </div>
+                              <div>
+                                  <div className="font-bold text-sm text-slate-800">{agent.name}</div>
+                                  <div className="text-xs text-slate-500">{agent.role}</div>
+                              </div>
+                          </div>
+                      </button>
+                  ))}
+              </div>
+          </div>
+      )}
 
       {/* Screen Content */}
       <div className="flex-1 flex flex-col p-6 items-center relative overflow-hidden z-10 bg-slate-50">
@@ -113,11 +198,11 @@ const Dialer: React.FC<DialerProps> = ({
              </div>
         </div>
 
-        {/* Search Bar (Only visible in IDLE) */}
+        {/* Search Bar / Agent Indicator */}
         {callState === CallState.IDLE && (
-            <div className="w-full mb-4 relative z-20">
+            <div className="w-full mb-4 relative z-20 space-y-2">
                 <div className="relative group">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-slate-500 transition-colors" />
                     <input 
                         type="text"
                         value={searchTerm}
@@ -126,7 +211,7 @@ const Dialer: React.FC<DialerProps> = ({
                             setShowSearch(!!e.target.value);
                         }}
                         placeholder="Search contacts..."
-                        className="w-full bg-slate-200/70 hover:bg-slate-200 focus:bg-white text-slate-900 text-sm rounded-xl pl-9 pr-8 py-2.5 outline-none transition-all border border-transparent focus:border-blue-500/30 focus:shadow-sm placeholder:text-slate-500"
+                        className="w-full bg-slate-200/70 hover:bg-slate-200 focus:bg-white text-slate-900 text-sm rounded-xl pl-9 pr-8 py-2.5 outline-none transition-all border border-transparent focus:border-slate-500/30 focus:shadow-sm placeholder:text-slate-500"
                     />
                     {searchTerm && (
                         <button 
@@ -137,6 +222,20 @@ const Dialer: React.FC<DialerProps> = ({
                         </button>
                     )}
                 </div>
+
+                {/* Agent Selection Pill */}
+                <button 
+                    onClick={() => setShowAgentSelector(true)}
+                    className="w-full flex items-center justify-between px-3 py-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-colors"
+                >
+                    <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">
+                            <Bot className="w-3 h-3"/>
+                        </div>
+                        <span className="text-xs font-bold text-slate-700">Agent: {selectedAgent?.name}</span>
+                    </div>
+                    <span className="text-xs text-slate-600 font-bold">Change</span>
+                </button>
 
                 {/* Search Results Overlay */}
                 {showSearch && (
@@ -149,23 +248,23 @@ const Dialer: React.FC<DialerProps> = ({
                                         key={lead.id}
                                         onClick={() => handleSearchSelect(lead)}
                                         className={`w-full px-4 py-3 flex items-center gap-3 transition-colors text-left ${
-                                            isSelected ? 'bg-indigo-50 border-l-4 border-indigo-500' : 'hover:bg-blue-50 border-l-4 border-transparent'
+                                            isSelected ? 'bg-slate-50 border-l-4 border-slate-500' : 'hover:bg-slate-50 border-l-4 border-transparent'
                                         }`}
                                     >
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                                            isSelected ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-600'
+                                            isSelected ? 'bg-slate-100 text-slate-600' : 'bg-slate-200 text-slate-600'
                                         }`}>
                                             {lead.firstName[0]}{lead.lastName[0]}
                                         </div>
                                         <div className="flex-1">
-                                            <div className={`text-sm font-semibold ${isSelected ? 'text-indigo-900' : 'text-slate-900'}`}>
+                                            <div className={`text-sm font-semibold ${isSelected ? 'text-slate-900' : 'text-slate-900'}`}>
                                                 {lead.firstName} {lead.lastName}
                                             </div>
-                                            <div className={`text-xs ${isSelected ? 'text-indigo-600' : 'text-slate-500'}`}>
+                                            <div className={`text-xs ${isSelected ? 'text-slate-600' : 'text-slate-500'}`}>
                                                 {lead.phone}
                                             </div>
                                         </div>
-                                        {isSelected && <Check className="w-4 h-4 text-indigo-600" />}
+                                        {isSelected && <Check className="w-4 h-4 text-slate-600" />}
                                     </button>
                                 );
                             })
@@ -185,12 +284,12 @@ const Dialer: React.FC<DialerProps> = ({
                     type="text" 
                     value={dialNumber}
                     readOnly
-                    aria-label="Dialed number"
+                    aria-label="Dialed Number"
                     className="bg-transparent text-4xl text-center font-semibold text-slate-900 w-full focus:outline-none tracking-tight mb-2 h-12"
                     placeholder=""
                 />
                  {activeLeadName && (
-                     <div className="text-indigo-600 font-medium text-sm bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full inline-block animate-in fade-in slide-in-from-bottom-2 shadow-sm">
+                     <div className="text-slate-600 font-medium text-sm bg-slate-50 border border-slate-100 px-3 py-1 rounded-full inline-block animate-in fade-in slide-in-from-bottom-2 shadow-sm">
                         {activeLeadName}
                      </div>
                  )}
@@ -201,7 +300,7 @@ const Dialer: React.FC<DialerProps> = ({
           ) : (
              <div className="text-center animate-in fade-in zoom-in duration-300">
                  <div className="relative w-28 h-28 mx-auto mb-6">
-                     <div className="absolute inset-0 bg-indigo-200 rounded-full animate-ping opacity-20"></div>
+                     <div className={`absolute inset-0 bg-slate-200 rounded-full animate-ping opacity-20 ${callState === CallState.RINGING ? 'animation-duration-1000' : ''}`}></div>
                      <div className="w-full h-full bg-gradient-to-b from-slate-100 to-slate-200 rounded-full flex items-center justify-center shadow-xl border-4 border-white relative z-10">
                         <span className="text-4xl text-slate-700 font-bold">
                             {(activeLeadName || 'Laurent')[0]}
@@ -212,7 +311,7 @@ const Dialer: React.FC<DialerProps> = ({
                  <h2 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight leading-tight px-4">{activeLeadName || 'Unknown'}</h2>
                  
                  {activeLeadName && (
-                    <div className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full mb-4">
+                    <div className="inline-block px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider rounded-full mb-4">
                         CRM Lead
                     </div>
                  )}
@@ -221,6 +320,7 @@ const Dialer: React.FC<DialerProps> = ({
                  
                  {/* Timer / Status Pill */}
                  <div className="inline-flex items-center justify-center px-5 py-2 bg-slate-100 rounded-full backdrop-blur-sm shadow-inner">
+                    {callState === CallState.RINGING && <p className="text-sm font-medium text-slate-600 animate-pulse">Ringing...</p>}
                     {callState === CallState.CONNECTING && <p className="text-sm font-medium text-slate-600 animate-pulse">Connecting...</p>}
                     {callState === CallState.ACTIVE && <p className="text-lg font-mono text-slate-800 font-bold tracking-widest">{formatTime(duration)}</p>}
                  </div>
@@ -242,7 +342,7 @@ const Dialer: React.FC<DialerProps> = ({
                  {[...Array(4)].map((_, i) => (
                     <div 
                         key={`out-${i}`}
-                        className="w-1.5 bg-blue-500 rounded-full transition-all duration-100"
+                        className="w-1.5 bg-slate-900 rounded-full transition-all duration-100"
                         style={{ height: `${Math.max(6, activeVisualizerHeight * (Math.random() + 0.3))}px` }}
                     />
                  ))}
@@ -255,14 +355,20 @@ const Dialer: React.FC<DialerProps> = ({
                 {['1','2','3','4','5','6','7','8','9','*','0','#'].map((key) => (
                     <button 
                         key={key} 
-                        onClick={() => handlePadClick(key)}
-                        className="w-[72px] h-[72px] rounded-full bg-slate-200 hover:bg-slate-300 flex flex-col items-center justify-center transition-all active:scale-95 active:bg-slate-400 group"
+                        // Long press handlers for '0'
+                        onMouseDown={() => handlePressStart(key)}
+                        onMouseUp={handlePressEnd}
+                        onMouseLeave={handlePressEnd}
+                        onTouchStart={() => handlePressStart(key)}
+                        onTouchEnd={handlePressEnd}
+                        onClick={() => handlePadButtonAction(key)}
+                        className="w-[72px] h-[72px] rounded-full bg-slate-200 hover:bg-slate-300 flex flex-col items-center justify-center transition-all active:scale-95 active:bg-slate-400 group select-none"
                     >
                         <span className="text-3xl font-normal text-slate-900 leading-none mb-0.5">{key}</span>
-                        {/* Letters below numbers */}
+                        {/* Letters below numbers & Plus logic */}
                         {key !== '*' && key !== '#' && key !== '1' && (
-                            <span className="text-[9px] font-bold text-slate-500 tracking-[2px] h-3">
-                                {key === '2' ? 'ABC' : key === '3' ? 'DEF' : key === '4' ? 'GHI' : key === '5' ? 'JKL' : key === '6' ? 'MNO' : key === '7' ? 'PQRS' : key === '8' ? 'TUV' : key === '9' ? 'WXYZ' : ''}
+                            <span className={`text-[9px] font-bold text-slate-500 tracking-[2px] h-3 ${key === '0' ? 'text-lg -mt-1 font-normal tracking-normal' : ''}`}>
+                                {key === '0' ? '+' : (key === '2' ? 'ABC' : key === '3' ? 'DEF' : key === '4' ? 'GHI' : key === '5' ? 'JKL' : key === '6' ? 'MNO' : key === '7' ? 'PQRS' : key === '8' ? 'TUV' : key === '9' ? 'WXYZ' : '')}
                             </span>
                         )}
                          {key === '1' && <span className="text-[9px] text-transparent h-3 select-none">.</span>}
@@ -283,7 +389,7 @@ const Dialer: React.FC<DialerProps> = ({
                         <button 
                             onClick={() => onCallStart(dialNumber)}
                             disabled={!dialNumber}
-                            className="w-[72px] h-[72px] bg-green-500 hover:bg-green-600 active:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 transition-all transform active:scale-95"
+                            className="w-[72px] h-[72px] bg-slate-500 hover:bg-slate-600 active:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-full flex items-center justify-center shadow-lg shadow-slate-500/30 transition-all transform active:scale-95"
                         >
                             <Phone className="w-8 h-8 text-white fill-current" />
                         </button>

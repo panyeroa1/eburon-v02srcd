@@ -16,10 +16,11 @@ interface TenantAuthData {
 interface TenantAuthProps {
   onLoginSuccess: () => void;
   onCancel: () => void;
+  initialMode?: 'login' | 'signup';
 }
 
-const TenantAuth: React.FC<TenantAuthProps> = ({ onLoginSuccess, onCancel }) => {
-  const [isLogin, setIsLogin] = useState(true);
+const TenantAuth: React.FC<TenantAuthProps> = ({ onLoginSuccess, onCancel, initialMode = 'login' }) => {
+  const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<TenantAuthData>({
